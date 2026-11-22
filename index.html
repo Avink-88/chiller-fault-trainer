@@ -333,6 +333,9 @@ details.card p{font-size:13.5px;margin:6px 0}
 .ctl:hover:not(:disabled){filter:brightness(1.15)}
 .ctl:disabled{opacity:.35;cursor:not-allowed}
 .ctl.go{background:#1f8f45}.ctl.stop{background:#c73323}.ctl.pause{background:#c28a00;color:#1d1b12}
+.ctl-mode{display:inline-flex;background:#3a403d;border-radius:999px;padding:3px}
+.ctl-mode button{border:0;background:transparent;color:#cfd5d1;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:700}
+.ctl-mode button[aria-pressed="true"]{background:#eef1ec;color:#1d211f}
 .pausecover{position:fixed;inset:0;z-index:46;background:rgba(10,15,13,.55);display:flex;align-items:center;justify-content:center;padding:16px}
 .pausecover div{background:var(--surface);color:var(--ink);border-radius:12px;padding:20px 24px;text-align:center;max-width:360px;display:flex;flex-direction:column;gap:6px}
 .pausecover b{font-size:22px}
@@ -341,7 +344,9 @@ details.card p{font-size:13.5px;margin:6px 0}
   .ctlbar{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));transform:none;justify-content:space-between;padding:8px 8px 8px 12px;gap:6px}
   .ctl-state{display:none}
   .ctl-time b{font-size:13.5px}
-  .ctl{padding:9px 11px;font-size:13px}
+  .ctl{padding:10px}
+  .ctl .t{display:none}
+  .ctl-mode button{padding:6px 9px}
 }
 
 /* 開始畫面：模式選擇 */
@@ -675,9 +680,14 @@ details.card p{font-size:13.5px;margin:6px 0}
 <div class="ctlbar" id="ctlBar" role="toolbar" aria-label="練習控制">
   <span class="ctl-time"><small>用時</small><b id="ctlTime">00:00</b></span>
   <span class="ctl-state" id="ctlState">未開始</span>
-  <button class="ctl go" id="ctlStart"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>開始</button>
-  <button class="ctl pause" id="ctlPause"><svg viewBox="0 0 16 16" aria-hidden="true" id="ctlPauseIcon"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg><span id="ctlPauseTxt">暫停</span></button>
-  <button class="ctl stop" id="ctlStop"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9z"/></svg>停止</button>
+  <!-- 模式切換：觀摩（無故障）／考試（故障檢修），隨時可以切換 -->
+  <div class="ctl-mode" role="group" aria-label="練習模式">
+    <button id="ctlModeNormal" aria-pressed="false">觀摩</button>
+    <button id="ctlModeExam" aria-pressed="true">考試</button>
+  </div>
+  <button class="ctl go" id="ctlStart" aria-label="開始"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg><span class="t">開始</span></button>
+  <button class="ctl pause" id="ctlPause" aria-label="暫停"><svg viewBox="0 0 16 16" aria-hidden="true" id="ctlPauseIcon"><path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/></svg><span class="t" id="ctlPauseTxt">暫停</span></button>
+  <button class="ctl stop" id="ctlStop" aria-label="停止"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5h9v9h-9z"/></svg><span class="t">停止</span></button>
 </div>
 <!-- 【暫停遮罩】暫停時蓋住畫面，避免計時停止時還能操作 -->
 <div class="pausecover" id="pauseCover" hidden><div><b>已暫停</b><span>計時與機器動作都停住了。按下方的「繼續」回到練習。</span></div></div>
@@ -697,7 +707,7 @@ details.card p{font-size:13.5px;margin:6px 0}
     <h3 id="startTitle">冰水主機故障檢修模擬</h3>
     <p>選擇練習模式。「故障檢修」會隨機設定故障；「正常運轉觀摩」沒有任何故障，可以先看懂正常時的動作與量測值。</p>
     <div class="modes" role="radiogroup" aria-label="練習模式">
-      <label class="mode"><input type="radio" name="mode" value="fault" checked><b>故障檢修</b><span>隨機故障、計時、計分，模擬檢定</span></label>
+      <label class="mode"><input type="radio" name="mode" value="fault" checked><b>故障檢修（考試）</b><span>隨機故障、計時、計分，模擬檢定</span></label>
       <label class="mode"><input type="radio" name="mode" value="normal"><b>正常運轉觀摩</b><span>沒有故障、不計分，先學會正常長什麼樣</span></label>
     </div>
     <div class="startopts" id="faultOpts">
@@ -1965,11 +1975,45 @@ function renderCtl(){
   $('#ctlTime').classList.toggle('late',!!E.limit&&E.limit-E.elapsed<=300);
   $('#ctlStart').disabled=active;
   $('#ctlPause').disabled=!active; $('#ctlStop').disabled=!active;
-  $('#ctlPauseTxt').textContent=st==='paused'?'繼續':'暫停';
+  $('#ctlPauseTxt').textContent=st==='paused'?'繼續':'暫停'; $('#ctlPause').setAttribute('aria-label',st==='paused'?'繼續':'暫停');
   $('#ctlPauseIcon').innerHTML=st==='paused'?'<path d="M4 2.5v11l9-5.5z"/>':'<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>';
   $('#pauseCover').hidden=st!=='paused';
+  const mode=E.started?E.mode:((document.querySelector('input[name=mode]:checked')||{}).value||'fault');
+  $('#ctlModeNormal').setAttribute('aria-pressed',mode==='normal');
+  $('#ctlModeExam').setAttribute('aria-pressed',mode!=='normal');
 }
 $('#ctlStart').addEventListener('click',showStart);
+
+/* ========== 【模式切換】觀摩／考試 ==========
+   考試進行中切到觀摩，會先問是否放棄本次考試。 */
+function selectMode(m){
+  const r=document.querySelector(`input[name=mode][value=${m}]`); if(r) r.checked=true;
+  $('#faultOpts').classList.toggle('off',m==='normal');
+}
+function startNormal(abandoned){
+  closeModal(); $('#startScr').hidden=true; $('#tour').hidden=true;
+  selectMode('normal'); newExam(); E.started=true;
+  if(abandoned) ev('已放棄本次考試','warn');
+  ev('切換到正常運轉觀摩（無故障）'); render();
+}
+$('#ctlModeNormal').addEventListener('click',()=>{
+  const active=E.started&&!E.ended;
+  if(active&&E.mode==='normal') return;
+  if(active&&E.mode==='fault'){
+    E.paused=true; S.pressed={ON:false,OFF:false};
+    openModal('放棄本次考試？',
+      `<p>目前考試還沒完成（已找到 ${E.faults.filter(f=>f.found).length}／${E.faults.length} 處）。切換到觀摩模式會放棄本次考試，進度不會保留。</p>`,
+      [{label:'繼續考試',fn:()=>{ E.paused=false; render(); }},
+       {label:'放棄並切換到觀摩',primary:true,fn:()=>startNormal(true)}]);
+    return;
+  }
+  startNormal(false);
+});
+$('#ctlModeExam').addEventListener('click',()=>{
+  const active=E.started&&!E.ended;
+  if(active&&E.mode==='fault') return;
+  selectMode('fault'); showStart();
+});
 $('#ctlPause').addEventListener('click',()=>{
   if(!E.started||E.ended) return;
   E.paused=!E.paused; S.pressed={ON:false,OFF:false};
