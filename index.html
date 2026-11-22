@@ -321,6 +321,7 @@ details.card p{font-size:13.5px;margin:6px 0}
 .ctl-time{display:flex;flex-direction:column;line-height:1.1;margin-right:4px}
 .ctl-time small{font-size:10.5px;color:#a9b2ad;letter-spacing:.08em}
 .ctl-time b{font-family:var(--f-mono);font-size:18px;font-variant-numeric:tabular-nums}
+.ctl-time b.late{color:#ff8b75}
 .ctl-state{font-size:12px;padding:3px 9px;border-radius:999px;background:#3a403d;color:#d9ddd8;white-space:nowrap}
 .ctl-state.run{background:#1f6b3a;color:#e6ffee}.ctl-state.paused{background:#7a5a00;color:#fff6d6}
 .ctl{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 14px;font-size:14px;font-weight:700;background:#3a403d;color:#f1f3ef}
@@ -335,6 +336,7 @@ details.card p{font-size:13.5px;margin:6px 0}
 @media (max-width:560px){
   .ctlbar{left:max(12px,env(safe-area-inset-left,0px));right:max(12px,env(safe-area-inset-right,0px));transform:none;justify-content:space-between;padding:8px 8px 8px 12px;gap:6px}
   .ctl-state{display:none}
+  .ctl-time b{font-size:13.5px}
   .ctl{padding:9px 11px;font-size:13px}
 }
 
@@ -510,7 +512,7 @@ details.card p{font-size:13.5px;margin:6px 0}
       <div class="tiles" id="tilesR"></div>
       <div class="tsub">保護與檢出元件</div>
       <div class="tiles" id="tilesP"></div>
-      <div class="tnote" id="tileNote">延時電驛已縮短時間方便練習，實際設定值寫在電路圖上。</div>
+      <div class="tnote" id="tileNote">延時電驛已縮短時間方便練習。正確設定：2S 4 s、2G1 12 s、2G2 ON 5 s／OFF 10 s、2G3／2G4／2G5 6 s、2C1 3 s、2C2 6 s。</div>
     </div>
 
     <!-- 【現場設備】手繪的 SVG 圖；有 id 的部分會被 render() 更新 -->
@@ -651,6 +653,13 @@ details.card p{font-size:13.5px;margin:6px 0}
       </select>
       <label class="chk"><input type="checkbox" id="chkWire" checked>含導線斷線</label>
       <label class="chk"><input type="checkbox" id="chkMain" checked>含主電路故障</label>
+      <label class="chk"><input type="checkbox" id="chkTimer" checked>含時間電驛設定錯誤</label>
+      <label for="selLimit">時間限制</label>
+      <select id="selLimit">
+        <option value="60" selected>60 分鐘（同檢定）</option>
+        <option value="30">30 分鐘</option>
+        <option value="0">不限時</option>
+      </select>
     </div>
     <p class="first" id="startFirst">第一次玩嗎？建議先看 1 分鐘的操作導覽。</p>
     <div class="dlg-actions">
@@ -1167,11 +1176,16 @@ function motorMode(){
   return 'stop';
 }
 /* 【物理模擬】延時電驛、水流、溫度、壓力的變化，以及跳脫條件。想調整設定值就改這裡的數字。 */
+/* 【時間設定錯誤】出題時可以讓某顆延時電驛的設定值錯誤，BAD_TIME 是錯誤時的實際時間。
+   例如 2S 設太長 → 一直停在 Y 運轉 → 51C 跳脫；2G2 ON 太短 → 旁通不夠 → 49C 動作。 */
+const BAD_TIME={'2S':{d:30},'2G1':{d:60},'2G4':{d:40},'2C1':{d:40},'2C2':{d:60},'2G2':{on:1,off:30}};
+const TIMER_COIL={}; ELIST.forEach(e=>{ if(e.relay&&TIMERS[e.relay]) TIMER_COIL[e.relay]=e; });
+function tset(k){ const T=TIMERS[k], c=TIMER_COIL[k]; return (c&&c.tbad)?Object.assign({},T,BAD_TIME[k]):T; }
 function stepPhysics(dt){
   const en=S.en;
-  // 延時電驛計時
+  // 延時電驛計時（tset() 會套用「時間設定錯誤」的故障）
   for(const k in TIMERS){
-    const T=TIMERS[k], st=S.tm[k], on=!!(S.nfb2&&en[k]);
+    const T=tset(k), st=S.tm[k], on=!!(S.nfb2&&en[k]);
     if(T.type==='on'){ if(on){ st.t+=dt; st.out=st.t>=T.d; } else { st.t=0; st.out=false; } }
     else if(T.type==='off'){ if(on){ st.out=true; st.t=0; } else if(st.out){ st.t+=dt; if(st.t>=T.d) st.out=false; } }
     else { if(on){ st.t+=dt; st.out=(st.t%(T.on+T.off))<T.on; } else { st.t=0; st.out=false; } }
@@ -1354,7 +1368,7 @@ function render(){
     const t=$('#t-'+k), st=t.querySelector('.st'), on=!!S.en[k];
     t.classList.toggle('on',on); t.classList.toggle('man',!S.nfb2&&!!S.manual[k]);
     if(!S.nfb2&&S.manual[k]){ st.textContent='手動壓下'; continue; }
-    const T=TIMERS[k];
+    const T=TIMERS[k]&&tset(k);
     if(!T){ st.textContent=on?'吸合':'釋放'; continue; }
     const tm=S.tm[k];
     if(T.type==='on') st.textContent=on?(tm.out?'已動作':`計時 ${Math.max(0,T.d-tm.t).toFixed(1)}s`):'釋放';
@@ -1546,13 +1560,15 @@ const EXCLUDE=new Set(['YL1','YL2','YL3','YL4','YL5','YL7','RL1','23C4n','63LPn'
   'SV1','SWR','REM','X3c','X3a1','X3a2','23C4','63LP','63HR','26W','47Ri1','47Ri2','WU','WV','WW']);
 const NOWIRE_ZONES=new Set(['母線','遠控','電源','47R','壓縮機','主電路 Y 結線']);
 function newExam(){
-  const count=+$('#selCount').value, inclWire=$('#chkWire').checked, inclMain=$('#chkMain').checked;
-  ELIST.forEach(e=>e.fault=false); WIRES.forEach(w=>w.fault=false);
+  const count=+$('#selCount').value, inclWire=$('#chkWire').checked, inclMain=$('#chkMain').checked, inclTimer=$('#chkTimer').checked;
+  ELIST.forEach(e=>{ e.fault=false; e.tbad=false; }); WIRES.forEach(w=>w.fault=false);
   resetSim();
-  Object.assign(E,{faults:[],score:100,elapsed:0,ended:false,revealed:false,started:false,paused:false,log:[],judged:[],events:[],hinted:new Set()});
+  Object.assign(E,{faults:[],score:100,elapsed:0,ended:false,revealed:false,started:false,paused:false,limit:(+$('#selLimit').value)*60,timeUp:false,overtime:false,log:[],judged:[],events:[],hinted:new Set()});
   MS.probe={r:null,b:null}; MS.next='r'; MS.penalized=false;
   const okSheet=s=>inclMain||s==='ctrl';
-  const pool=ELIST.filter(e=>!EXCLUDE.has(e.id)&&okSheet(e.sheet)).map(e=>({kind:'el',id:e.id,zone:e.zone}));
+  const pool=ELIST.filter(e=>!EXCLUDE.has(e.id)&&okSheet(e.sheet)).map(e=>({kind:'el',id:e.id,zone:e.zone,mode:'open'}));
+  // 時間設定錯誤：每顆可能出錯的延時電驛各一個候選
+  if(inclTimer) for(const k in BAD_TIME) pool.push({kind:'el',id:TIMER_COIL[k].id,zone:TIMER_COIL[k].zone,mode:'time'});
   const wpool=inclWire?WIRES.filter(w=>w.breakable&&!w.hidden&&!NOWIRE_ZONES.has(w.zone)&&okSheet(NODES[w.a].sheet)).map(w=>({kind:'wire',id:w.id,zone:w.zone})):[];
   const picks=[], used=new Set();
   if(wpool.length&&(count>=2||Math.random()<0.35)){ const w=shuffle(wpool.slice())[0]; picks.push(w); used.add(w.zone); }
@@ -1561,7 +1577,7 @@ function newExam(){
     if(used.has(c.zone)) continue;
     picks.push(c); used.add(c.zone);
   }
-  for(const p of picks){ if(p.kind==='el') EL[p.id].fault=true; else WIRES.find(w=>w.id===p.id).fault=true; p.found=false; }
+  for(const p of picks){ if(p.kind==='el'){ if(p.mode==='time') EL[p.id].tbad=true; else EL[p.id].fault=true; } else WIRES.find(w=>w.id===p.id).fault=true; p.found=false; }
   E.faults=picks;
   say(`新題目：共 ${picks.length} 處故障。依「下一步」引導送電、起動，觀察哪裡不正常。`,'info');
   renderMarks(); renderJudge(); renderLog(); renderEvents();
@@ -1585,7 +1601,9 @@ function openJudge(kind,id){
   if(E.ended){ say('本題已結束，按「出新題」繼續練習。','info'); return; }
   if(E.faults.find(f=>f.kind===kind&&f.id===id&&f.found)){ say('這裡已經修復過了。','info'); return; }
   const k=kind==='el'?EL[id].kind:'wire';
-  const opts=shuffle(OPTS[k].map((t,i)=>({t,i})));
+  // 延時電驛的線圈多一個選項「時間設定錯誤」（index 2）
+  const list=OPTS[k].concat(kind==='el'&&TIMER_COIL[EL[id].relay]?['時間設定錯誤']:[]);
+  const opts=shuffle(list.map((t,i)=>({t,i})));
   const zone=kind==='el'?EL[id].zone:WIRES.find(w=>w.id===id).zone;
   openModal('判定故障',
     `<p><b style="color:var(--ink)">${describe(kind,id)}</b></p><p>所在迴路：${zone}</p>
@@ -1598,8 +1616,9 @@ function judge(kind,id,choice){
   const f=E.faults.find(q=>q.kind===kind&&q.id===id&&!q.found);
   const name=describe(kind,id), t=fmtT(E.elapsed);
   // 【計分】位置與故障情形都對：修復；位置對但情形錯：扣 5 分；位置錯：扣 10 分
-  if(f&&choice===0){
-    f.found=true; if(kind==='el') EL[id].fault=false; else WIRES.find(w=>w.id===id).fault=false;
+  const right = f && choice===(f.mode==='time'?2:0);
+  if(right){
+    f.found=true; if(kind==='el'){ EL[id].fault=false; EL[id].tbad=false; } else WIRES.find(w=>w.id===id).fault=false;
     E.judged.unshift({t,cls:'ok',msg:'正確：'+name+' — 已修復'});
     say('判定正確，已修復。記得重新送電試車，確認其他迴路也正常。','ok'); ev('修復：'+name);
   } else if(f){
@@ -1617,7 +1636,7 @@ function judge(kind,id,choice){
 function finish(){
   E.ended=true;
   const wrong=E.judged.filter(j=>j.cls!=='ok').length;
-  openModal(E.score>=60?'全部故障已排除':'故障已排除，但分數未達 60',
+  openModal(E.overtime?'故障已排除，但超過時間，本次未通過':E.score>=60?'全部故障已排除，本次通過':'故障已排除，但分數未達 60',
     `<div class="sumgrid"><div><b>${E.score}</b><small>分數</small></div><div><b>${fmtT(E.elapsed)}</b><small>用時</small></div><div><b>${E.log.length}</b><small>量測次數</small></div></div>
      <p>誤判 ${wrong} 次、使用提示 ${E.hinted.size} 次。建議送電試車，確認壓縮機能完成 Y-Δ 切換並正常運轉。</p>`,
     [{label:'回到電路試車'},{label:'再出一題',primary:true,fn:showStart}]);
@@ -1636,7 +1655,7 @@ function hint(){
 // 結束本題並在電路圖上標出所有故障（看答案、按停止都用這個）
 function endWithAnswers(){
   E.paused=false; E.revealed=true; E.ended=true; renderMarks();
-  say('答案　'+E.faults.map(f=>(f.found?'已找到：':'未找到：')+describe(f.kind,f.id)).join('；'),'bad');
+  say('答案　'+E.faults.map(f=>(f.found?'已找到：':'未找到：')+describe(f.kind,f.id)+(f.mode==='time'?'【時間設定錯誤】':'')).join('；'),'bad');
 }
 function reveal(){
   if(E.ended) return;
@@ -1825,6 +1844,20 @@ $('#startGo').addEventListener('click',()=>{
 });
 $('#startTour').addEventListener('click',()=>{ $('#startScr').hidden=true; showTour(0); });
 
+/* ========== 【時間限制】 ==========
+   到達開始畫面設定的時間（預設 60 分鐘）時暫停並跳出「時間到」：
+   可以選「繼續練習」（本次記為未通過）或「重新開始」。 */
+function timeUp(){
+  E.timeUp=true; E.overtime=true; E.paused=true; S.pressed={ON:false,OFF:false};
+  const found=E.faults.filter(f=>f.found).length;
+  ev('時間到，本次未通過','bad');
+  openModal('時間到，本次未通過',
+    `<div class="sumgrid"><div><b>${found}/${E.faults.length}</b><small>已找到</small></div><div><b>${E.score}</b><small>分數</small></div><div><b>${fmtT(E.limit)}</b><small>時間限制</small></div></div>
+     <p>可以繼續把剩下的故障找完（本次仍記為未通過），或重新開始一題。</p>`,
+    [{label:'繼續練習',fn:()=>{ E.paused=false; ev('超過時間，繼續練習','warn'); }},
+     {label:'重新開始',primary:true,fn:()=>{ E.paused=false; showStart(); }}]);
+}
+
 /* ========== 控制列（開始／暫停／停止） ==========
    開始：沒有進行中的題目時，打開開始畫面。
    暫停：計時、延時電驛、溫度壓力全部停住，畫面蓋上遮罩；再按一次「繼續」。
@@ -1833,7 +1866,8 @@ function ctlState(){ return !E.started?'idle':E.ended?'ended':E.paused?'paused':
 function renderCtl(){
   const st=ctlState(), active=st==='run'||st==='paused';
   const el=$('#ctlState'); el.textContent={idle:'未開始',run:'練習中',paused:'已暫停',ended:'本題結束'}[st]; el.className='ctl-state '+st;
-  $('#ctlTime').textContent=fmtT(E.elapsed);
+  $('#ctlTime').textContent=fmtT(E.elapsed)+(E.limit?' / '+fmtT(E.limit):'');
+  $('#ctlTime').classList.toggle('late',!!E.limit&&E.limit-E.elapsed<=300);
   $('#ctlStart').disabled=active;
   $('#ctlPause').disabled=!active; $('#ctlStop').disabled=!active;
   $('#ctlPauseTxt').textContent=st==='paused'?'繼續':'暫停';
@@ -1860,7 +1894,7 @@ let last=performance.now();
 function tick(){
   const now=performance.now(); const real=Math.min(0.25,(now-last)/1000); last=now;
   if(E.paused){ render(); return; }   // 暫停：只更新畫面，不計時、不動作
-  if(E.started&&!E.ended&&$('#startScr').hidden) E.elapsed+=real;
+  if(E.started&&!E.ended&&$('#startScr').hidden){ E.elapsed+=real; if(E.limit&&!E.timeUp&&E.elapsed>=E.limit) timeUp(); }
   stepLogic(); stepPhysics(real*MS.speed); render();
 }
 setInterval(tick,100); tick();
