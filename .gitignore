@@ -1,0 +1,5 @@
+# 不需要上傳到 GitHub 的檔案
+.claude/
+.vscode/
+Thumbs.db
+desktop.ini
