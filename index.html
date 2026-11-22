@@ -245,13 +245,17 @@ select,.btn{border:1px solid var(--line);background:var(--surface);border-radius
 #plant{display:block;width:100%;height:auto}
 #plant text{font-family:var(--f-body);fill:var(--ink);font-size:12px}
 #plant .m{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-#plant .eq{fill:var(--paper);stroke:var(--ink);stroke-width:1.8}
-#plant .pipe{fill:none;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+#plant .eq{fill:var(--paper);stroke:var(--ink);stroke-width:1.8;transition:fill .3s}
+#plant .spin circle.eq,#plant .running{fill:color-mix(in srgb,var(--ok) 28%,var(--paper));stroke:var(--ok);stroke-width:2.4}
+#plant .comp-hum{fill:color-mix(in srgb,var(--bad) 30%,var(--paper));stroke:var(--bad);stroke-width:2.4}
+#plant .shake{animation:shake .12s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes shake{25%{transform:translate(.6px,-.4px)}75%{transform:translate(-.6px,.4px)}}
+#plant .pipe{fill:none;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
 #plant .pcw{stroke:color-mix(in srgb,var(--cold) 45%,var(--paper))}
 #plant .pch{stroke:color-mix(in srgb,var(--accent) 50%,var(--paper))}
 #plant .prf{stroke:color-mix(in srgb,var(--hot) 38%,var(--paper));stroke-width:4}
-#plant .flow{fill:none;stroke-width:2.2;stroke-dasharray:5 9;opacity:0;stroke-linecap:round}
-#plant .run .flow{opacity:1;animation:flow 0.9s linear infinite}
+#plant .flow{fill:none;stroke-width:3.4;stroke-dasharray:6 8;opacity:0;stroke-linecap:round}
+#plant .run .flow{opacity:1;animation:flow 0.6s linear infinite}
 #plant .fcw{stroke:var(--cold)}#plant .fch{stroke:var(--accent)}#plant .frf{stroke:var(--hot)}
 @keyframes flow{to{stroke-dashoffset:-14}}
 #plant .rot{transform-box:fill-box;transform-origin:center}
@@ -340,6 +344,17 @@ details.card p{font-size:13.5px;margin:6px 0}
   .ctl{padding:9px 11px;font-size:13px}
 }
 
+/* 開始畫面：模式選擇 */
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.mode{display:flex;flex-direction:column;gap:2px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--paper)}
+.mode input{position:absolute;opacity:0;pointer-events:none}
+.mode b{font-size:15px}.mode span{font-size:12px;color:var(--muted)}
+.mode:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.mode:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.startopts.off{opacity:.4;pointer-events:none}
+@media (max-width:440px){.modes{grid-template-columns:1fr}}
+.demo-badge{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:var(--ok);border-radius:999px;padding:2px 10px;margin-left:6px;vertical-align:middle}
+
 /* 開始畫面 */
 .dlg.start{max-width:500px;padding:24px}
 .dlg.start .kicker{font-size:12px;letter-spacing:.12em;color:var(--muted)}
@@ -357,7 +372,23 @@ details.card p{font-size:13.5px;margin:6px 0}
 .tour-pop p{margin:0;font-size:13.5px;line-height:1.65}
 .tour-pop .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
 
-@media (prefers-reduced-motion: reduce){#plant .run .flow,#plant .spin .rot,.lcd.danger{animation:none}.tour-hole{transition:none}}
+/* 現場設備狀態卡 */
+.pstat{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+.pst{border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--paper);display:flex;flex-direction:column;gap:1px;min-width:0}
+.pst small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pst b{font-size:14px;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.pst b::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
+.pst.on{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--paper))}
+.pst.on b::before{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.pst.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 12%,var(--paper))}
+.pst.bad b::before{background:var(--bad)}
+@media (max-width:440px){.pstat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* 放大檢視 */
+.plantbig{position:fixed;inset:0;z-index:47;background:rgba(10,15,13,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+.plantbig .pb-box{background:var(--surface);border-radius:12px;padding:14px;width:min(1000px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.plantbig .pb-head{display:flex;align-items:center;gap:8px}
+.plantbig .pb-head h3{font-size:17px;margin-right:auto}
+@media (prefers-reduced-motion: reduce){#plant .run .flow,#plant .spin .rot,#plant .shake,.lcd.danger{animation:none}.tour-hole{transition:none}}
 </style>
 </head>
 <body>
@@ -372,7 +403,7 @@ details.card p{font-size:13.5px;margin:6px 0}
 <header class="top" id="hdr">
   <div class="brand">
     <div class="kicker">冷凍空調裝修 乙級 ・ 第三站 練習</div>
-    <h1>冰水主機故障檢修模擬</h1>
+    <h1>冰水主機故障檢修模擬<span class="demo-badge" id="modeBadge" hidden>正常運轉觀摩</span></h1>
   </div>
   <div class="stats">
     <div class="stat"><small>已找到</small><b id="stFound">0/0</b></div>
@@ -517,7 +548,8 @@ details.card p{font-size:13.5px;margin:6px 0}
 
     <!-- 【現場設備】手繪的 SVG 圖；有 id 的部分會被 render() 更新 -->
     <div class="card" id="plantCard">
-      <h2>現場設備 <small>水冷式冰水主機系統</small></h2>
+      <h2>現場設備 <small>水冷式冰水主機系統</small><button class="btn small" id="btnPlantBig" style="margin-left:auto">放大檢視</button></h2>
+      <div id="plantHome">
       <svg id="plant" viewBox="0 0 540 350" role="img" aria-label="冰水主機系統現場圖">
         <g id="gcw">
           <path class="pipe pcw" d="M134 112 H165 V98"/><path class="pipe pcw" d="M165 72 V52 H200"/><path class="pipe pcw" d="M250 40 V20 H112 V44"/>
@@ -542,7 +574,7 @@ details.card p{font-size:13.5px;margin:6px 0}
         <text x="275" y="64" text-anchor="middle">冷凝器</text>
         <rect class="eq" x="200" y="230" width="150" height="38" rx="19"/>
         <text x="275" y="254" text-anchor="middle">蒸發器</text>
-        <rect class="eq" x="395" y="125" width="74" height="62" rx="14"/>
+        <rect class="eq" id="compBody" x="395" y="125" width="74" height="62" rx="14"/>
         <text x="432" y="148" text-anchor="middle">壓縮機</text>
         <text x="432" y="168" text-anchor="middle" class="m" id="compState">停止</text>
         <rect class="heat" id="heat" x="400" y="191" width="64" height="6" rx="3"/>
@@ -592,6 +624,18 @@ details.card p{font-size:13.5px;margin:6px 0}
           <text x="34" y="20" class="small">kg/cm²</text>
         </g>
       </svg>
+      <!-- 狀態卡：一眼看出哪些設備在運轉 -->
+      <div class="pstat" id="pstat">
+        <div class="pst" id="ps-p1"><small>冰水泵 P1</small><b>停止</b></div>
+        <div class="pst" id="ps-p2"><small>冷卻水泵 P2</small><b>停止</b></div>
+        <div class="pst" id="ps-comp"><small>壓縮機</small><b>停止</b></div>
+        <div class="pst" id="ps-cap"><small>容量</small><b>—</b></div>
+        <div class="pst" id="ps-tch"><small>冰水出水</small><b>—</b></div>
+        <div class="pst" id="ps-sv2"><small>SV2 旁通</small><b>關</b></div>
+        <div class="pst" id="ps-cch"><small>CCH 加熱器</small><b>關</b></div>
+        <div class="pst" id="ps-amp"><small>壓縮機電流</small><b>0 A</b></div>
+      </div>
+      </div>
       <ul class="events" id="events"></ul>
     </div>
 
@@ -609,7 +653,7 @@ details.card p{font-size:13.5px;margin:6px 0}
     </div>
 
     <!-- 【說明文字】<details> 是可以點開／收合的區塊，文字可以直接修改 -->
-    <details class="card">
+    <details class="card" id="seqDetails">
       <summary>正常動作順序</summary>
       <ol>
         <li>NFB1 送主電源：47R 檢出三相正常。NFB2 送控制電源：WL 電源燈亮、CCH 曲軸箱加熱器通電。</li>
@@ -638,13 +682,25 @@ details.card p{font-size:13.5px;margin:6px 0}
 <!-- 【暫停遮罩】暫停時蓋住畫面，避免計時停止時還能操作 -->
 <div class="pausecover" id="pauseCover" hidden><div><b>已暫停</b><span>計時與機器動作都停住了。按下方的「繼續」回到練習。</span></div></div>
 
+<!-- 【現場設備放大檢視】按「放大檢視」時，把現場圖和狀態卡搬到這裡顯示 -->
+<div class="plantbig" id="plantBig" hidden>
+  <div class="pb-box" role="dialog" aria-label="現場設備放大檢視">
+    <div class="pb-head"><h3>現場設備</h3><button class="btn" id="btnPlantClose">關閉</button></div>
+    <div id="plantBigHolder"></div>
+  </div>
+</div>
+
 <!-- 【開始畫面】選好題目設定後按「開始練習」，計時才會開始 -->
 <div class="modal" id="startScr">
   <div class="dlg start" role="dialog" aria-modal="true" aria-labelledby="startTitle">
     <div class="kicker">冷凍空調裝修 乙級 ・ 第三站 練習</div>
     <h3 id="startTitle">冰水主機故障檢修模擬</h3>
-    <p>系統會隨機設定故障。送電觀察、用三用電表量測，找出所有故障並判定。按下「開始練習」後才開始計時。</p>
-    <div class="startopts">
+    <p>選擇練習模式。「故障檢修」會隨機設定故障；「正常運轉觀摩」沒有任何故障，可以先看懂正常時的動作與量測值。</p>
+    <div class="modes" role="radiogroup" aria-label="練習模式">
+      <label class="mode"><input type="radio" name="mode" value="fault" checked><b>故障檢修</b><span>隨機故障、計時、計分，模擬檢定</span></label>
+      <label class="mode"><input type="radio" name="mode" value="normal"><b>正常運轉觀摩</b><span>沒有故障、不計分，先學會正常長什麼樣</span></label>
+    </div>
+    <div class="startopts" id="faultOpts">
       <label for="selCount">故障數量</label>
       <select id="selCount">
         <option value="1">1 處故障</option>
@@ -1355,7 +1411,7 @@ function buildTiles(){
 function render(){
   $('#stScore').textContent=E.score;
   $('#stTime').textContent=fmtT(E.elapsed);
-  $('#stFound').textContent=E.faults.filter(f=>f.found).length+'/'+E.faults.length;
+  $('#stFound').textContent=E.mode==='normal'?'觀摩':E.faults.filter(f=>f.found).length+'/'+E.faults.length;
   $('#btnNfb1').setAttribute('aria-pressed',S.nfb1); $('#nfb1Txt').textContent=S.nfb1?'ON 送電':'OFF';
   $('#btnNfb2').setAttribute('aria-pressed',S.nfb2); $('#nfb2Txt').textContent=S.nfb2?'ON 送電':'OFF';
   $('#btnEstop').setAttribute('aria-pressed',S.estop);
@@ -1388,6 +1444,18 @@ function render(){
   $('#heat').classList.toggle('on',!!S.loadOn.CCH);
   for(const k of ['1','2','3']) $('#csv'+k).classList.toggle('on',!!S.loadOn['CSV'+k]);
   $('#compState').textContent={stop:'停止',Y:'Y 起動',D:'Δ 運轉',hum:'嗡嗡聲!'}[S.comp];
+  const cb=$('#compBody'), crun=S.comp==='Y'||S.comp==='D';
+  cb.classList.toggle('running',crun); cb.classList.toggle('comp-hum',S.comp==='hum'); cb.classList.toggle('shake',crun||S.comp==='hum');
+  // 狀態卡
+  const pst=(id,on,txt,bad)=>{ const el=$('#ps-'+id); el.classList.toggle('on',!!on&&!bad); el.classList.toggle('bad',!!bad); el.querySelector('b').textContent=txt; };
+  pst('p1',S.pump1,S.pump1?(S.flow1>0.8?'運轉・有水流':'起動中'):'停止');
+  pst('p2',S.pump2,S.pump2?(S.flow2>0.8?'運轉・有水流':'起動中'):'停止');
+  pst('comp',crun,{stop:'停止',Y:'Y 起動',D:'Δ 運轉',hum:'嗡嗡聲（異常）'}[S.comp],S.comp==='hum');
+  pst('cap',crun,S.cap==null?'—':S.cap+'%');
+  pst('tch',S.Tch<=7.5,S.Tch.toFixed(1)+' °C');
+  pst('sv2',S.loadOn.SV2,S.loadOn.SV2?'開':'關');
+  pst('cch',S.loadOn.CCH,S.loadOn.CCH?'加熱中':'關');
+  pst('amp',crun,S.compA.toFixed(1)+' A',S.comp==='hum');
   $('#compA').textContent=S.compA.toFixed(1)+' A';
   $('#tTd').textContent='吐出 '+S.Td.toFixed(0)+' °C';
   $('#tCap').textContent=S.cap==null?'容量 —':('容量 '+S.cap+'%'+(S.cap===0?'（全卸載）':''));
@@ -1578,8 +1646,13 @@ function newExam(){
     picks.push(c); used.add(c.zone);
   }
   for(const p of picks){ if(p.kind==='el'){ if(p.mode==='time') EL[p.id].tbad=true; else EL[p.id].fault=true; } else WIRES.find(w=>w.id===p.id).fault=true; p.found=false; }
+  // 正常運轉觀摩模式：不設故障、不限時
+  E.mode=(document.querySelector('input[name=mode]:checked')||{}).value||'fault';
+  if(E.mode==='normal'){ picks.length=0; ELIST.forEach(e=>{ e.fault=false; e.tbad=false; }); WIRES.forEach(w=>w.fault=false); E.limit=0; }
   E.faults=picks;
-  say(`新題目：共 ${picks.length} 處故障。依「下一步」引導送電、起動，觀察哪裡不正常。`,'info');
+  applyMode();
+  if(E.mode==='normal') say('正常運轉觀摩：這一題沒有任何故障。照「正常動作順序」操作，觀察每個元件怎麼動作，也可以量測正常時的電壓、電阻，記在記事本當作比較。','ok');
+  else say(`新題目：共 ${picks.length} 處故障。依「下一步」引導送電、起動，觀察哪裡不正常。`,'info');
   renderMarks(); renderJudge(); renderLog(); renderEvents();
   setTool('measure');
 }
@@ -1655,6 +1728,7 @@ function hint(){
 // 結束本題並在電路圖上標出所有故障（看答案、按停止都用這個）
 function endWithAnswers(){
   E.paused=false; E.revealed=true; E.ended=true; renderMarks();
+  if(E.mode==='normal'){ say('觀摩結束。準備好了就按「開始」選「故障檢修」挑戰看看。','ok'); return; }
   say('答案　'+E.faults.map(f=>(f.found?'已找到：':'未找到：')+describe(f.kind,f.id)+(f.mode==='time'?'【時間設定錯誤】':'')).join('；'),'bad');
 }
 function reveal(){
@@ -1678,6 +1752,27 @@ function openModal(title,body,actions){
 }
 function closeModal(){ $('#modal').hidden=true; }
 $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+
+/* ========== 練習模式 ==========
+   applyMode()：觀摩模式時關閉判定相關按鈕、自動打開「顯示通電狀態」與「正常動作順序」。 */
+function applyMode(){
+  const normal=E.mode==='normal';
+  for(const id of ['#btnMark','#btnHint','#btnReveal','#toolMark']) $(id).disabled=normal;
+  if(normal) setTool('measure');
+  MS.live=normal; $('#chkLive').checked=normal;
+  $('#seqDetails').open=normal||$('#seqDetails').open;
+  $('#modeBadge').hidden=!normal;
+}
+$('#startScr').addEventListener('change',e=>{
+  if(e.target.name==='mode') $('#faultOpts').classList.toggle('off',e.target.value==='normal');
+});
+
+/* ========== 現場設備放大檢視 ========== */
+function openPlantBig(){ $('#plantBigHolder').appendChild($('#plant')); $('#plantBigHolder').appendChild($('#pstat')); $('#plantBig').hidden=false; $('#btnPlantClose').focus(); }
+function closePlantBig(){ const home=$('#plantHome'); home.appendChild($('#plant')); home.appendChild($('#pstat')); $('#plantBig').hidden=true; }
+$('#btnPlantBig').addEventListener('click',openPlantBig);
+$('#btnPlantClose').addEventListener('click',closePlantBig);
+$('#plantBig').addEventListener('click',e=>{ if(e.target.id==='plantBig') closePlantBig(); });
 
 /* ========== 工具模式與電路圖分頁 ========== */
 function setTool(t){
@@ -1755,7 +1850,7 @@ $('#tourPrev').addEventListener('click',()=>{ if(tourI>0) showTour(tourI-1); });
 $('#tourSkip').addEventListener('click',endTour);
 $('#btnTour').addEventListener('click',()=>showTour(0));
 window.addEventListener('resize',()=>{ if(!$('#tour').hidden) showTour(tourI); });
-document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(!$('#modal').hidden) closeModal(); else if(!$('#tour').hidden) endTour(); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(!$('#modal').hidden) closeModal(); else if(!$('#tour').hidden) endTour(); else if(!$('#plantBig').hidden) closePlantBig(); });
 
 /* ========== 事件綁定 ==========
    addEventListener('click', ...) 的意思是「被點到時執行這段程式」。 */
@@ -1840,7 +1935,7 @@ function showStart(){
 $('#startGo').addEventListener('click',()=>{
   $('#startScr').hidden=true;
   newExam(); E.started=true;
-  ev('開始練習：共 '+E.faults.length+' 處故障');
+  ev(E.mode==='normal'?'開始正常運轉觀摩（無故障）':'開始練習：共 '+E.faults.length+' 處故障');
 });
 $('#startTour').addEventListener('click',()=>{ $('#startScr').hidden=true; showTour(0); });
 
@@ -1865,7 +1960,7 @@ function timeUp(){
 function ctlState(){ return !E.started?'idle':E.ended?'ended':E.paused?'paused':'run'; }
 function renderCtl(){
   const st=ctlState(), active=st==='run'||st==='paused';
-  const el=$('#ctlState'); el.textContent={idle:'未開始',run:'練習中',paused:'已暫停',ended:'本題結束'}[st]; el.className='ctl-state '+st;
+  const el=$('#ctlState'); el.textContent={idle:'未開始',run:E.mode==='normal'?'觀摩中':'練習中',paused:'已暫停',ended:'本題結束'}[st]; el.className='ctl-state '+st;
   $('#ctlTime').textContent=fmtT(E.elapsed)+(E.limit?' / '+fmtT(E.limit):'');
   $('#ctlTime').classList.toggle('late',!!E.limit&&E.limit-E.elapsed<=300);
   $('#ctlStart').disabled=active;
