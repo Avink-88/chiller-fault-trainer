@@ -2,7 +2,7 @@
 
 冷凍空調裝修 **乙級・第三站** 練習用的網頁互動遊戲。給碰不到實體設備、或第一次接觸的同學，在瀏覽器裡練習故障檢修。
 
-**▶ 直接玩：** GITHUB_PAGES_URL
+**▶ 直接玩：** https://avink-88.github.io/chiller-fault-trainer/
 
 ## 功能
 
