@@ -13,14 +13,17 @@
   想改東西時，先看這張「去哪裡找」表（用 Ctrl+F 搜尋右邊的關鍵字）：
     改顏色 ............................ 搜尋「【顏色設定】」
     改畫面文字、按鈕名稱 .............. 直接搜尋畫面上看到的中文字
-    改電路圖（元件、位置、電阻值）.... 搜尋「【電路定義】」
+    改控制電路（元件、線號、位置）.... 搜尋「【控制電路定義】」
+    改主電路（NFB1、MCM、MCS、MCD）... 搜尋「【主電路定義】」
+    改延時電驛的時間 .................. 搜尋「【延時設定】」
     改壓力、溫度、跳脫設定值 .......... 搜尋「【物理模擬】」
     改扣分規則 ........................ 搜尋「【計分】」
     改出題方式（哪些元件會壞）........ 搜尋「【出題】」
-    改故障選項文字 .................... 搜尋「【故障選項】」
+    改導覽教學的文字 .................. 搜尋「【導覽步驟】」
+    改操作引導的提示 .................. 搜尋「【操作引導】」
 
   註解的寫法：
-    HTML 裡用  <!-- 註解 -->
+    HTML 裡用  < ! - - 註解 - - >（實際寫的時候符號要連在一起，這裡加空格是避免提早結束註解）
     CSS  裡用  /* 註解 */
     JavaScript 裡用  // 單行註解  或  /* 多行註解 */
   註解只給人看，瀏覽器會忽略它，所以可以放心寫筆記。
@@ -40,7 +43,7 @@
    第一段：CSS（外觀）
    寫法是「選擇器 { 屬性: 值; }」，例如  .btn{ color:red }  代表
    「所有 class 是 btn 的東西，文字變紅色」。
-   版面：左欄＝三用電表＋控制電路圖，右欄＝盤面、盤內元件、現場設備、判定。
+   版面：左欄＝三用電表＋電路圖＋記事本，右欄＝盤面、盤內元件、現場設備、判定。
    螢幕太窄（手機）時自動改成單欄。
    ================================================================ */
 
@@ -53,7 +56,7 @@
   --accent:#0d6870; --accent-ink:#ffffff; --accent-soft:#d3e7e8;
   --hot:#c4361f; --cold:#2655a5; --warn:#b98200; --ok:#2a8140; --bad:#c4361f;
   --lcd:#b6c3a0; --lcd-ink:#18230f; --plate:#d3dad6; --plate-ink:#27302d;
-  --lamp-g:#22b856; --lamp-r:#f2412f; --lamp-y:#f7bb12;
+  --lamp-g:#22b856; --lamp-r:#f2412f; --lamp-y:#f7bb12; --lamp-w:#f4f1e4;
   --f-body:"Noto Sans TC",system-ui,-apple-system,"Microsoft JhengHei",sans-serif;
   --f-mono:"IBM Plex Mono","Noto Sans TC",ui-monospace,monospace;
   --f-lcd:"Share Tech Mono","IBM Plex Mono",ui-monospace,monospace;
@@ -66,7 +69,7 @@
   --accent:#4cb2ba; --accent-ink:#04201e; --accent-soft:#163a3c;
   --hot:#ff6b55; --cold:#7ea7ff; --warn:#f0bd3a; --ok:#5cc56d; --bad:#ff6b55;
   --lcd:#90a37a; --lcd-ink:#0d1508; --plate:#26302d; --plate-ink:#d6dfdb;
-  --lamp-g:#3ad86e; --lamp-r:#ff5a45; --lamp-y:#ffcb33;
+  --lamp-g:#3ad86e; --lamp-r:#ff5a45; --lamp-y:#ffcb33; --lamp-w:#fffbe8;
   --shadow:0 0 0 1px rgba(255,255,255,.02); color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#111715; --surface:#19211f; --paper:#0e1412; --grid:#151d1a;
@@ -74,15 +77,15 @@
   --accent:#4cb2ba; --accent-ink:#04201e; --accent-soft:#163a3c;
   --hot:#ff6b55; --cold:#7ea7ff; --warn:#f0bd3a; --ok:#5cc56d; --bad:#ff6b55;
   --lcd:#90a37a; --lcd-ink:#0d1508; --plate:#26302d; --plate-ink:#d6dfdb;
-  --lamp-g:#3ad86e; --lamp-r:#ff5a45; --lamp-y:#ffcb33;
+  --lamp-g:#3ad86e; --lamp-r:#ff5a45; --lamp-y:#ffcb33; --lamp-w:#fffbe8;
   --shadow:0 0 0 1px rgba(255,255,255,.02); color-scheme:dark }
 
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55;
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.55;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 40px}
 button{font:inherit;color:inherit;cursor:pointer}
-button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 h1,h2,h3{margin:0;text-wrap:balance}
 
 /* 頁首：標題列與分數 */
@@ -98,19 +101,19 @@ select,.btn{border:1px solid var(--line);background:var(--surface);border-radius
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:700}
 .btn.danger{color:var(--bad)}
+.btn.small{padding:4px 8px;font-size:12px}
 .chk{display:inline-flex;gap:5px;align-items:center;font-size:13px;color:var(--muted)}
 
-.layout{display:grid;grid-template-columns:minmax(0,1fr) 410px;gap:16px;align-items:start}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:16px;align-items:start}
 @media (max-width:1120px){.layout{grid-template-columns:minmax(0,1fr)}}
 .col{display:flex;flex-direction:column;gap:14px;min-width:0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;box-shadow:var(--shadow);min-width:0}
-.card h2{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card h2{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .card h2 small{font-weight:400;color:var(--muted);font-size:12px}
 
 /* 三用電表：黑色電表本體、液晶顯示、檔位按鈕、紅黑探棒 */
 .meter{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
   background:#2b2f2c;color:#f1f3ef;border-radius:12px;padding:10px 12px;box-shadow:0 10px 24px -16px rgba(0,0,0,.6)}
-.meter .brandm{font-size:11px;letter-spacing:.14em;color:#f2c230;font-weight:700;writing-mode:horizontal-tb}
 .lcd{background:var(--lcd);color:var(--lcd-ink);border-radius:6px;padding:4px 12px;min-width:200px;display:flex;align-items:baseline;justify-content:flex-end;gap:8px;
   box-shadow:inset 0 2px 6px rgba(0,0,0,.35);font-family:var(--f-lcd)}
 .lcd #lcdVal{font-size:38px;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:.04em}
@@ -126,7 +129,7 @@ select,.btn{border:1px solid var(--line);background:var(--surface);border-radius
 .pchip i{width:12px;height:12px;border-radius:50%;display:inline-block}
 .pchip.r i{background:#e53b2c}.pchip.b i{background:#111;border:1px solid #888}
 .pchip[aria-pressed="true"]{outline:2px solid #f2c230;outline-offset:1px}
-.pchip span{font-family:var(--f-mono);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pchip span{font-family:var(--f-mono);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .meter .clr{background:transparent;border:1px solid #555b57;color:#d9ddd8;border-radius:999px;padding:5px 10px;font-size:12.5px}
 
 .toolbar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
@@ -137,82 +140,105 @@ select,.btn{border:1px solid var(--line);background:var(--surface);border-radius
 .tseg button.markbtn[aria-pressed="true"]{background:var(--bad);color:#fff}
 .toolbar .hint{color:var(--muted);font-size:12.5px}
 
-.dwrap{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow-x:auto;box-shadow:var(--shadow)}
-#dia{display:block;width:100%;min-width:880px;height:auto;user-select:none;-webkit-user-select:none}
+/* 電路圖：控制電路／主電路兩張，用分頁切換 */
+.dwrap{background:var(--paper);border:1px solid var(--line);border-radius:10px;overflow:auto;box-shadow:var(--shadow);max-height:78vh}
+.dia{display:block;width:100%;height:auto;user-select:none;-webkit-user-select:none}
+#diaC{min-width:960px}
+#diaM{min-width:760px}
 .info{font-size:13px;color:var(--muted);min-height:1.6em;padding:0 4px}
 .info b{color:var(--ink)}
+.dia text{font-family:var(--f-mono);fill:var(--ink)}
+.dia .lbl{font-size:13px;font-weight:500;text-anchor:middle}
+.dia .lbl.big{font-size:14px;font-weight:600}
+.dia .rdesc{font-size:12.5px;fill:var(--muted)}
+.dia .wnum{font-size:11.5px;fill:var(--accent);text-anchor:middle;font-weight:600}
+.dia .ttl{font-size:13px;fill:var(--muted)}
+.dia .sect{font-size:14px;font-weight:700;fill:var(--muted);letter-spacing:.1em}
+.dia .w{fill:none;stroke:var(--wire);stroke-width:2;stroke-linejoin:round}
+.dia .w.hot{stroke:var(--hot);stroke-width:2.6}
+.dia .w.neu{stroke:var(--cold);stroke-width:2.6}
+.dia .whit{fill:none;stroke:transparent;stroke-width:14;pointer-events:none}
+.dia.mark .whit{pointer-events:stroke;cursor:pointer}
+.dia.mark .whit:hover+.w{stroke:var(--accent);stroke-width:4}
+.dia .s{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round}
+.dia .body{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.dia .tagc{fill:var(--paper);stroke:var(--muted);stroke-width:1.2}
+.dia .tagt{font-size:9.5px;text-anchor:middle;fill:var(--muted)}
+.dia .cbar{stroke:var(--ok);stroke-width:3.5;opacity:0}
+.dia .el.closed .cbar{opacity:1}
+.dia .el.on .body{fill:color-mix(in srgb,var(--hot) 30%,var(--paper))}
+.dia .el .hit{fill:transparent;stroke:none}
+.dia .el:hover .s,.dia .el:hover .body{stroke:var(--accent)}
+.dia.mark .el{cursor:pointer}
+.dia.mark .el:hover .hit{fill:color-mix(in srgb,var(--bad) 12%,transparent)}
+.dia .nd{fill:var(--ink)}
+.dia .ndhit{fill:transparent;cursor:crosshair}
+.dia .ndhit:hover{fill:color-mix(in srgb,#f2c230 45%,transparent)}
+.dia.mark .ndhit{pointer-events:none}
+.dia .probe{pointer-events:none}
+.dia .probe circle{stroke:#fff;stroke-width:2}
+.dia .probe text{fill:#fff;font-size:13px;font-weight:700;text-anchor:middle}
+.dia .pill text{font-size:11.5px;font-weight:700;fill:#fff;text-anchor:middle}
+.dia .pill.ok rect{fill:var(--ok)}
+.dia .pill.bad rect{fill:var(--bad)}
+.dia .devbox{fill:var(--paper);stroke:var(--ink);stroke-width:2}
 
-/* 控制電路圖（SVG 向量圖）：導線、元件符號、端點、探棒的樣式。
-   .hot＝帶電紅線、.neu＝中性線藍線（只在勾選「顯示通電狀態」時出現） */
-#dia text{font-family:var(--f-mono);fill:var(--ink)}
-#dia .lbl{font-size:13.5px;font-weight:500;text-anchor:middle}
-#dia .lbl.big{font-size:15px;font-weight:600}
-#dia .rdesc{font-size:13px;fill:var(--muted)}
-#dia .lnum{font-size:11px;fill:var(--muted);text-anchor:middle}
-#dia .ttl{font-size:13px;fill:var(--muted)}
-#dia .w{fill:none;stroke:var(--wire);stroke-width:2;stroke-linejoin:round}
-#dia .w.hot{stroke:var(--hot);stroke-width:2.6}
-#dia .w.neu{stroke:var(--cold);stroke-width:2.6}
-#dia .whit{fill:none;stroke:transparent;stroke-width:14;pointer-events:none}
-#dia.mark .whit{pointer-events:stroke;cursor:pointer}
-#dia.mark .whit:hover+.w,#dia .w.hl{stroke:var(--accent);stroke-width:4}
-#dia .s{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round}
-#dia .body{fill:var(--paper);stroke:var(--ink);stroke-width:2}
-#dia .tagc{fill:var(--paper);stroke:var(--muted);stroke-width:1.2}
-#dia .tagt{font-size:9.5px;text-anchor:middle;fill:var(--muted)}
-#dia .cbar{stroke:var(--ok);stroke-width:3.5;opacity:0}
-#dia .el.closed .cbar{opacity:1}
-#dia .el.on .body{fill:color-mix(in srgb,var(--hot) 30%,var(--paper))}
-#dia .el .hit{fill:transparent;stroke:none}
-#dia .el:hover .s,#dia .el:hover .body{stroke:var(--accent)}
-#dia.mark .el{cursor:pointer}
-#dia.mark .el:hover .hit{fill:color-mix(in srgb,var(--bad) 12%,transparent)}
-#dia .nd{fill:var(--ink)}
-#dia .ndhit{fill:transparent;cursor:crosshair}
-#dia .ndhit:hover{fill:color-mix(in srgb,#f2c230 45%,transparent)}
-#dia.mark .ndhit{pointer-events:none}
-#dia .probe{pointer-events:none}
-#dia .probe circle{stroke:#fff;stroke-width:2}
-#dia .probe text{fill:#fff;font-size:13px;font-weight:700;text-anchor:middle}
-#dia .pill rect{rx:9}
-#dia .pill text{font-size:11.5px;font-weight:700;fill:#fff;text-anchor:middle}
-#dia .pill.ok rect{fill:var(--ok)}
-#dia .pill.bad rect{fill:var(--bad)}
+/* 記事本 */
+#notes{width:100%;min-height:150px;resize:vertical;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--paper);color:var(--ink);
+  font-family:var(--f-mono);font-size:13px;line-height:1.6;
+  background-image:linear-gradient(transparent 20px,var(--grid) 21px);background-size:100% 20.8px}
+.noterow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.noterow .save{margin-left:auto;font-size:12px;color:var(--muted)}
 
 /* 控制盤面：NFB 開關、ON/OFF 按鈕、指示燈（.lit＝亮燈） */
-.face{background:var(--plate);color:var(--plate-ink);border-radius:10px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:14px 16px;align-items:center}
-.nfb{display:flex;align-items:center;gap:10px}
-.nfb-btn{width:46px;height:70px;border-radius:8px;border:2px solid #3b423f;background:#2c312f;position:relative;padding:0}
-.nfb-btn .lever{position:absolute;left:9px;right:9px;height:28px;border-radius:4px;background:#e9ece9;bottom:6px;transition:bottom .15s,top .15s;box-shadow:0 2px 0 #999}
-.nfb-btn[aria-pressed="true"] .lever{bottom:34px;background:#f2c230}
-.nfb b{display:block;font-family:var(--f-mono);font-size:15px}
-.nfb small{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
-.pbs{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-.pb{width:56px;height:56px;border-radius:50%;border:4px solid #3b423f;font-family:var(--f-mono);font-weight:700;font-size:13px;color:#fff;touch-action:none;box-shadow:0 4px 0 #2a2f2d;transition:transform .05s}
+.guide{display:flex;gap:10px;align-items:flex-start;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:13px}
+.guide b{color:var(--accent);white-space:nowrap}
+.face{background:var(--plate);color:var(--plate-ink);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.frow{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center}
+.fgroup{display:flex;flex-direction:column;gap:4px}
+.fgroup>small{font-size:11px;color:var(--muted);letter-spacing:.06em}
+.nfb{display:flex;align-items:center;gap:8px}
+.nfb-btn{width:40px;height:62px;border-radius:7px;border:2px solid #3b423f;background:#2c312f;position:relative;padding:0}
+.nfb-btn .lever{position:absolute;left:8px;right:8px;height:24px;border-radius:4px;background:#e9ece9;bottom:6px;transition:bottom .15s;box-shadow:0 2px 0 #999}
+.nfb-btn[aria-pressed="true"] .lever{bottom:30px;background:#f2c230}
+.nfb b{display:block;font-family:var(--f-mono);font-size:13px}
+.nfb span{font-size:11.5px;color:var(--muted);display:block;line-height:1.3}
+.estop{width:54px;height:54px;border-radius:50%;border:5px solid #f2c230;background:radial-gradient(circle at 40% 35%,#ff6a55,#b3170a);color:#fff;font-size:10.5px;font-weight:700;box-shadow:0 4px 0 #6d0d05;line-height:1.1}
+.estop[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 1px 0 #6d0d05;filter:brightness(.8)}
+.sel{display:inline-flex;border:2px solid #3b423f;border-radius:8px;overflow:hidden;background:#2c312f}
+.sel button{border:0;background:transparent;color:#d9ddd8;padding:6px 9px;font-size:12px}
+.sel button[aria-pressed="true"]{background:#f2c230;color:#1d1b12;font-weight:700}
+.tog{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 10px 4px 4px;font-size:12.5px;color:var(--ink)}
+.tog i{width:26px;height:16px;border-radius:999px;background:var(--line);position:relative;transition:background .15s}
+.tog i::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:#fff;transition:left .15s}
+.tog[aria-checked="true"] i{background:var(--ok)}
+.tog[aria-checked="true"] i::after{left:12px}
+.pbs{display:flex;gap:10px;align-items:center}
+.pb{width:50px;height:50px;border-radius:50%;border:4px solid #3b423f;font-weight:700;font-size:12px;color:#fff;touch-action:none;box-shadow:0 4px 0 #2a2f2d;transition:transform .05s;line-height:1.1}
 .pb.green{background:#1f8f45}.pb.red{background:#c73323}
 .pb.down{transform:translateY(3px);box-shadow:0 1px 0 #2a2f2d;filter:brightness(.85)}
 .pb.latched{outline:3px dashed #f2c230;outline-offset:3px}
-.pbnote{font-size:11.5px;color:var(--muted);max-width:150px;line-height:1.35}
-.lamps{grid-column:1/-1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
-.lamp{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;text-align:center;line-height:1.2}
-.lamp i{width:26px;height:26px;border-radius:50%;border:3px solid #3b423f;display:block;background:color-mix(in srgb,var(--c) 28%,#333)}
-.lamp.lit i{background:var(--c);box-shadow:0 0 14px 3px color-mix(in srgb,var(--c) 70%,transparent)}
+.pbnote{font-size:11px;color:var(--muted);max-width:140px;line-height:1.35}
+.lamps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px 4px}
+.lamp{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;text-align:center;line-height:1.2}
+.lamp i{width:22px;height:22px;border-radius:50%;border:3px solid #3b423f;display:block;background:color-mix(in srgb,var(--c) 26%,#333)}
+.lamp.lit i{background:var(--c);box-shadow:0 0 12px 3px color-mix(in srgb,var(--c) 70%,transparent)}
 .lamp b{font-family:var(--f-mono);font-size:11px}
-.resets{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap}
-@media (max-width:440px){.lamps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:440px){.lamps{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
 /* 盤內元件方塊：.on＝吸合（紅框）、.trip＝跳脫（黃框）、.man＝手動壓下（虛線） */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.tile{border:1px solid var(--line);border-radius:8px;padding:6px 6px 5px;background:var(--paper);text-align:left;display:flex;flex-direction:column;gap:1px;min-width:0}
+.tile{border:1px solid var(--line);border-radius:8px;padding:5px 6px 4px;background:var(--paper);text-align:left;display:flex;flex-direction:column;gap:0;min-width:0}
 .tile b{font-family:var(--f-mono);font-size:13px}
-.tile small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile .st{font-size:11.5px;font-weight:700;color:var(--muted)}
+.tile small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .st{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile.on{border-color:var(--hot);background:color-mix(in srgb,var(--hot) 10%,var(--paper))}
 .tile.on .st{color:var(--hot)}
 .tile.man{outline:2px dashed var(--warn)}
 .tile.trip{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,var(--paper))}
 .tile.trip .st{color:var(--warn)}
 .tile.static{cursor:default}
+.tsub{font-size:12px;color:var(--muted);margin:10px 0 6px}
 .tnote{font-size:12px;color:var(--muted);margin-top:8px}
 
 /* 現場設備圖：管路、水流動畫（.run）、風扇與水泵旋轉（.spin）、壓力錶 */
@@ -237,8 +263,8 @@ select,.btn{border:1px solid var(--line);background:var(--surface);border-radius
 #plant .fs rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.4}
 #plant .fs.on rect{fill:var(--ok)}
 #plant .sv path{fill:var(--paper);stroke:var(--ink);stroke-width:1.4}
-#plant .sv.on rect{fill:var(--hot)}
 #plant .sv rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.2}
+#plant .sv.on rect{fill:var(--hot)}
 #plant .gface{fill:var(--paper);stroke:var(--ink);stroke-width:1.8}
 #plant .needle{stroke:var(--hot);stroke-width:2.2;stroke-linecap:round;transition:transform .2s}
 #plant .tick{stroke:var(--muted);stroke-width:1}
@@ -273,11 +299,10 @@ details.card summary{font-weight:700;cursor:pointer;font-size:15px}
 details.card ol,details.card ul{padding-left:20px;margin:8px 0;font-size:13.5px}
 details.card li{margin:3px 0}
 details.card p{font-size:13.5px;margin:6px 0}
-kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:0 4px;background:var(--paper)}
 
 /* 彈出對話框（判定故障、完成結算） */
 .modal{position:fixed;inset:0;background:rgba(10,15,13,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
-.dlg{background:var(--surface);color:var(--ink);border-radius:12px;max-width:440px;width:100%;padding:18px;border:1px solid var(--line);box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
+.dlg{background:var(--surface);color:var(--ink);border-radius:12px;max-width:460px;width:100%;padding:18px;border:1px solid var(--line);box-shadow:0 20px 50px -20px rgba(0,0,0,.6)}
 .dlg h3{font-size:18px;margin-bottom:6px}
 .dlg p{margin:6px 0;font-size:13.5px;color:var(--muted)}
 .dlg .opts{display:flex;flex-direction:column;gap:6px;margin:12px 0}
@@ -289,7 +314,16 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
 .sumgrid b{display:block;font-family:var(--f-mono);font-size:22px}
 .sumgrid small{color:var(--muted);font-size:11.5px}
 
-@media (prefers-reduced-motion: reduce){#plant .run .flow,#plant .spin .rot,.lcd.danger{animation:none}}
+/* 導覽教學：半透明遮罩＋框出目前介紹的區塊＋說明卡片 */
+.tour{position:fixed;inset:0;z-index:60}
+.tour-hole{position:fixed;border-radius:10px;box-shadow:0 0 0 9999px rgba(8,14,12,.62);border:3px solid #f2c230;transition:all .25s;pointer-events:none}
+.tour-pop{position:fixed;width:min(360px,calc(100vw - 32px));background:var(--surface);color:var(--ink);border-radius:12px;padding:16px;border:1px solid var(--line);box-shadow:0 18px 40px -16px rgba(0,0,0,.6)}
+.tour-pop .step{font-family:var(--f-mono);font-size:12px;color:var(--accent);font-weight:600}
+.tour-pop h3{font-size:17px;margin:2px 0 6px}
+.tour-pop p{margin:0;font-size:13.5px;line-height:1.65}
+.tour-pop .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+@media (prefers-reduced-motion: reduce){#plant .run .flow,#plant .spin .rot,.lcd.danger{animation:none}.tour-hole{transition:none}}
 </style>
 </head>
 <body>
@@ -300,8 +334,8 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
      JavaScript 會用這個名字找到它、改變它的內容。
      ================================================================ -->
 
-<!-- 【頁首】標題、分數、用時、出新題 -->
-<header class="top">
+<!-- 【頁首】標題、分數、用時、出新題、操作導覽 -->
+<header class="top" id="hdr">
   <div class="brand">
     <div class="kicker">冷凍空調裝修 乙級 ・ 第三站 練習</div>
     <h1>冰水主機故障檢修模擬</h1>
@@ -312,12 +346,14 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
     <div class="stat"><small>用時</small><b id="stTime">00:00</b></div>
   </div>
   <div class="newexam">
+    <button class="btn" id="btnTour">操作導覽</button>
     <select id="selCount" aria-label="故障數量">
       <option value="1">1 處故障</option>
       <option value="2" selected>2 處故障</option>
       <option value="3">3 處故障</option>
     </select>
     <label class="chk"><input type="checkbox" id="chkWire" checked>含導線斷線</label>
+    <label class="chk"><input type="checkbox" id="chkMain" checked>含主電路</label>
     <button class="btn primary" id="btnNew">出新題</button>
   </div>
 </header>
@@ -327,7 +363,7 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
   <!-- ===== 左欄 ===== -->
   <section class="col">
     <!-- 【三用電表】lcdVal＝液晶讀值；data-mode 是檔位（OFF／ACV 交流電壓／OHM 電阻） -->
-    <div class="meter" aria-label="三用電表">
+    <div class="meter" id="meterBox" aria-label="三用電表">
       <div class="lcd" id="lcd"><span id="lcdVal">0.0</span><small id="lcdUnit">V AC</small></div>
       <div class="seg" role="group" aria-label="檔位">
         <button data-mode="OFF" aria-pressed="false">OFF</button>
@@ -341,19 +377,41 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
       </div>
     </div>
 
-    <!-- 【工具列】切換「量測」或「判定故障」模式 -->
-    <div class="toolbar">
+    <!-- 【工具列】切換電路圖分頁、「量測」或「判定故障」模式 -->
+    <div class="toolbar" id="toolBox">
+      <div class="tseg" role="group" aria-label="電路圖" id="sheetTabs">
+        <button id="tabC" aria-pressed="true">控制電路</button>
+        <button id="tabM" aria-pressed="false">主電路</button>
+      </div>
       <div class="tseg" role="group" aria-label="操作模式">
         <button id="toolMeasure" aria-pressed="true">量測</button>
         <button id="toolMark" class="markbtn" aria-pressed="false">判定故障</button>
       </div>
+      <div class="tseg" role="group" aria-label="縮放電路圖">
+        <button id="zoomOut" aria-label="縮小電路圖">－</button>
+        <button id="zoomIn" aria-label="放大電路圖">＋</button>
+      </div>
       <label class="chk"><input type="checkbox" id="chkLive">顯示通電狀態（練習用）</label>
-      <span class="hint" id="toolHint">點電路圖上的端點放置探棒，紅黑棒輪流放置。</span>
+      <span class="hint" id="toolHint">點電路圖上的端點放置探棒，紅黑棒輪流放置。兩張圖的端點可以互量。</span>
     </div>
 
-    <!-- 【控制電路圖】內容是空的，由 JavaScript 的 buildSVG() 自動畫出來 -->
-    <div class="dwrap"><svg id="dia" viewBox="0 0 1200 900" role="img" aria-label="冰水主機控制電路圖"></svg></div>
-    <div class="info" id="info">把滑鼠移到元件或端點上可查看說明。</div>
+    <!-- 【電路圖】內容是空的，由 JavaScript 的 buildSheet() 自動畫出來 -->
+    <div class="dwrap" id="wrapC"><svg class="dia" id="diaC" viewBox="0 0 1380 1640" role="img" aria-label="冰水主機控制電路圖"></svg></div>
+    <div class="dwrap" id="wrapM" hidden><svg class="dia" id="diaM" viewBox="0 0 1060 520" role="img" aria-label="冰水主機主電路圖"></svg></div>
+    <div class="info" id="info">把滑鼠移到元件或端點上可查看說明。藍綠色小數字是線號，和檢定圖相同。</div>
+
+    <!-- 【記事本】玩家自己的筆記，自動存在這台電腦的瀏覽器裡 -->
+    <div class="card" id="noteCard">
+      <h2>我的記事本 <small>自動儲存在這台電腦的瀏覽器</small></h2>
+      <textarea id="notes" placeholder="例：按 ON 後 X1 不吸合，量 17 號線有 220 V、18 號線 0 V → 懷疑 2G4 接點"></textarea>
+      <div class="noterow">
+        <button class="btn small" id="noteRead">插入目前讀值</button>
+        <button class="btn small" id="noteTime">插入時間</button>
+        <button class="btn small" id="noteState">插入元件狀態</button>
+        <button class="btn small danger" id="noteClear">清空</button>
+        <span class="save" id="noteSave"></span>
+      </div>
+    </div>
 
     <!-- 【量測紀錄】表格內容由 renderLog() 填入 -->
     <div class="card">
@@ -367,83 +425,92 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
 
   <!-- ===== 右欄 ===== -->
   <aside class="col">
-    <!-- 【控制盤面】NFB、按鈕、指示燈；燈號 id 是 lp-燈名，例如 lp-GL -->
-    <div class="card">
-      <h2>控制盤面</h2>
+    <!-- 【控制盤面】主電源、控制電源、緊急開關、選擇開關、按鈕、外部泵浦、指示燈 -->
+    <div class="card" id="panelCard">
+      <h2>控制盤面 <label class="chk" style="margin-left:auto;font-weight:400"><input type="checkbox" id="chkGuide" checked>顯示操作引導</label></h2>
+      <div class="guide" id="guideBox"><b>下一步</b><span id="guideTxt"></span></div>
       <div class="face">
-        <div class="nfb">
-          <button class="nfb-btn" id="btnNfb" aria-pressed="false" aria-label="無熔絲開關 NFB"><span class="lever"></span></button>
-          <div><b>NFB</b><small id="nfbTxt">OFF 斷電</small></div>
+        <div class="frow" id="powerBox">
+          <div class="nfb"><button class="nfb-btn" id="btnNfb1" aria-pressed="false" aria-label="主電源 NFB1"><span class="lever"></span></button>
+            <div><b>NFB1</b><span>主電源 3φ</span><span id="nfb1Txt">OFF</span></div></div>
+          <div class="nfb"><button class="nfb-btn" id="btnNfb2" aria-pressed="false" aria-label="控制電源 NFB2"><span class="lever"></span></button>
+            <div><b>NFB2</b><span>控制電源</span><span id="nfb2Txt">OFF</span></div></div>
+          <button class="estop" id="btnEstop" aria-pressed="false">E-STOP</button>
         </div>
-        <div class="pbs">
-          <button class="pb green" id="pbOn">ON</button>
-          <button class="pb red" id="pbOff">OFF</button>
-          <div class="pbnote" id="pbNote">送電時按住為按下。斷電時點一下＝持續壓住（量電阻用）。</div>
+        <div class="frow" id="opBox">
+          <div class="fgroup"><small>選擇開關 SW</small>
+            <div class="sel" role="group" aria-label="選擇開關">
+              <button data-sw="near" aria-pressed="false">近控</button>
+              <button data-sw="stop" aria-pressed="true">停止</button>
+              <button data-sw="remote" aria-pressed="false">遠控</button>
+            </div></div>
+          <div class="pbs">
+            <button class="pb green" id="pbOn">起動<br>PB</button>
+            <button class="pb red" id="pbOff">停止<br>PB</button>
+            <div class="pbnote">送電時按住為按下。斷電時點一下＝持續壓住（量電阻用）。</div>
+          </div>
         </div>
-        <div class="lamps">
-          <div class="lamp" id="lp-GL" style="--c:var(--lamp-g)"><i></i><b>GL</b>停止</div>
-          <div class="lamp" id="lp-RL1" style="--c:var(--lamp-r)"><i></i><b>RL1</b>冰水泵</div>
-          <div class="lamp" id="lp-RL2" style="--c:var(--lamp-r)"><i></i><b>RL2</b>冷卻水泵</div>
-          <div class="lamp" id="lp-RL3" style="--c:var(--lamp-r)"><i></i><b>RL3</b>水塔風扇</div>
-          <div class="lamp" id="lp-RL4" style="--c:var(--lamp-r)"><i></i><b>RL4</b>壓縮機</div>
-          <div class="lamp" id="lp-YL" style="--c:var(--lamp-y)"><i></i><b>YL</b>過載</div>
+        <div class="frow" id="pumpBox">
+          <div class="fgroup"><small>外部設備（連鎖 F.S）</small>
+            <div class="frow" style="gap:8px">
+              <button class="tog" id="togP1" role="switch" aria-checked="false"><i></i>冰水泵</button>
+              <button class="tog" id="togP2" role="switch" aria-checked="false"><i></i>冷卻水泵</button>
+              <button class="tog" id="togRem" role="switch" aria-checked="false"><i></i>遠控接點 F</button>
+            </div></div>
         </div>
-        <div class="resets">
-          <button class="btn" id="rstHP">HP 手動復歸</button>
-          <button class="btn" id="rstTHC">THC 過載復歸</button>
+        <div class="lamps" id="lampBox">
+          <div class="lamp" id="lp-WL" style="--c:var(--lamp-w)"><i></i><b>WL</b>電源</div>
+          <div class="lamp" id="lp-GL1" style="--c:var(--lamp-g)"><i></i><b>GL1</b>運轉</div>
+          <div class="lamp" id="lp-GL2" style="--c:var(--lamp-g)"><i></i><b>GL2</b>溫度到停機</div>
+          <div class="lamp" id="lp-RL1" style="--c:var(--lamp-r)"><i></i><b>RL1</b>電壓相序</div>
+          <div class="lamp" id="lp-YL1" style="--c:var(--lamp-y)"><i></i><b>YL1</b>油位過低</div>
+          <div class="lamp" id="lp-YL2" style="--c:var(--lamp-y)"><i></i><b>YL2</b>低壓過低</div>
+          <div class="lamp" id="lp-YL3" style="--c:var(--lamp-y)"><i></i><b>YL3</b>高壓過高</div>
+          <div class="lamp" id="lp-YL4" style="--c:var(--lamp-y)"><i></i><b>YL4</b>馬達過熱</div>
+          <div class="lamp" id="lp-YL5" style="--c:var(--lamp-y)"><i></i><b>YL5</b>冰水過低</div>
+          <div class="lamp" id="lp-YL6" style="--c:var(--lamp-y)"><i></i><b>YL6</b>水壓差</div>
+          <div class="lamp" id="lp-YL7" style="--c:var(--lamp-y)"><i></i><b>YL7</b>回流管過低</div>
+        </div>
+        <div class="frow" style="gap:8px">
+          <button class="btn" id="rst63">63HR 手動復歸</button>
+          <button class="btn" id="rst51">51C 過載復歸</button>
           <button class="btn" id="btnSpeed">時間 ×1</button>
         </div>
       </div>
     </div>
 
     <!-- 【盤內元件】方塊由 buildTiles() 依 TILE_DEFS 清單產生 -->
-    <div class="card">
-      <h2>盤內元件 <small>斷電時可點接觸器手動壓下</small></h2>
-      <div class="tiles" id="tiles"></div>
-      <div class="tnote" id="tileNote"></div>
+    <div class="card" id="tilesCard">
+      <h2>盤內元件 <small>斷電時可點電驛手動壓下</small></h2>
+      <div class="tiles" id="tilesR"></div>
+      <div class="tsub">保護與檢出元件</div>
+      <div class="tiles" id="tilesP"></div>
+      <div class="tnote" id="tileNote">延時電驛已縮短時間方便練習，實際設定值寫在電路圖上。</div>
     </div>
 
-    <!-- 【現場設備】手繪的 SVG 圖；有 id 的部分（風扇、水泵、壓力錶指針…）會被 render() 更新 -->
-    <div class="card">
+    <!-- 【現場設備】手繪的 SVG 圖；有 id 的部分會被 render() 更新 -->
+    <div class="card" id="plantCard">
       <h2>現場設備 <small>水冷式冰水主機系統</small></h2>
       <svg id="plant" viewBox="0 0 540 350" role="img" aria-label="冰水主機系統現場圖">
-        <!-- cooling water loop -->
         <g id="gcw">
-          <path class="pipe pcw" d="M134 112 H165 V98"/>
-          <path class="pipe pcw" d="M165 72 V52 H200"/>
-          <path class="pipe pcw" d="M250 40 V20 H112 V44"/>
-          <path class="flow fcw" d="M134 112 H165 V98"/>
-          <path class="flow fcw" d="M165 72 V52 H200"/>
-          <path class="flow fcw" d="M250 40 V20 H112 V44"/>
+          <path class="pipe pcw" d="M134 112 H165 V98"/><path class="pipe pcw" d="M165 72 V52 H200"/><path class="pipe pcw" d="M250 40 V20 H112 V44"/>
+          <path class="flow fcw" d="M134 112 H165 V98"/><path class="flow fcw" d="M165 72 V52 H200"/><path class="flow fcw" d="M250 40 V20 H112 V44"/>
         </g>
-        <!-- chilled water loop -->
         <g id="gch">
-          <path class="pipe pch" d="M200 240 H163"/>
-          <path class="pipe pch" d="M137 240 H110"/>
-          <path class="pipe pch" d="M110 275 H190 V262 H200"/>
-          <path class="flow fch" d="M200 240 H163"/>
-          <path class="flow fch" d="M137 240 H110"/>
-          <path class="flow fch" d="M110 275 H190 V262 H200"/>
+          <path class="pipe pch" d="M200 240 H163"/><path class="pipe pch" d="M137 240 H110"/><path class="pipe pch" d="M110 275 H190 V262 H200"/>
+          <path class="flow fch" d="M200 240 H163"/><path class="flow fch" d="M137 240 H110"/><path class="flow fch" d="M110 275 H190 V262 H200"/>
         </g>
-        <!-- refrigerant -->
         <g id="grf">
-          <path class="pipe prf" d="M432 125 V59 H350"/>
-          <path class="pipe prf" d="M275 78 V230"/>
-          <path class="pipe prf" d="M350 255 H515 V156 H469"/>
-          <path class="flow frf" d="M432 125 V59 H350"/>
-          <path class="flow frf" d="M275 78 V230"/>
-          <path class="flow frf" d="M350 255 H515 V156 H469"/>
+          <path class="pipe prf" d="M432 125 V59 H350"/><path class="pipe prf" d="M275 78 V230"/><path class="pipe prf" d="M350 255 H515 V156 H469"/>
+          <path class="flow frf" d="M432 125 V59 H350"/><path class="flow frf" d="M275 78 V230"/><path class="flow frf" d="M350 255 H515 V156 H469"/>
         </g>
         <path class="tick" d="M430 255 V272" stroke-width="2"/>
         <path class="tick" d="M432 84 H476" stroke-width="2"/>
-        <!-- tower -->
         <polygon class="eq" points="42,44 118,44 136,126 24,126"/>
         <path class="tick" d="M36 70 H124 M32 86 H128 M29 102 H131"/>
         <text x="80" y="118" text-anchor="middle" class="small">冷卻水塔</text>
         <g id="fan" transform="translate(80 34)"><g class="rot"><circle r="14" class="eq"/>
           <path class="blade" d="M0 0 L3 -12 L-3 -12 Z"/><path class="blade" d="M0 0 L9 8 L5 11 Z"/><path class="blade" d="M0 0 L-9 8 L-5 11 Z"/></g></g>
-        <text x="122" y="30" class="small">風扇</text>
-        <!-- condenser / evaporator / compressor -->
         <rect class="eq" x="200" y="40" width="150" height="38" rx="19"/>
         <text x="275" y="64" text-anchor="middle">冷凝器</text>
         <rect class="eq" x="200" y="230" width="150" height="38" rx="19"/>
@@ -452,55 +519,50 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
         <text x="432" y="148" text-anchor="middle">壓縮機</text>
         <text x="432" y="168" text-anchor="middle" class="m" id="compState">停止</text>
         <rect class="heat" id="heat" x="400" y="191" width="64" height="6" rx="3"/>
-        <text x="432" y="214" text-anchor="middle" class="m small" id="compA">0.0 A</text>
-        <!-- SV / expansion valve -->
-        <g class="sv" id="svg-sv" transform="translate(275 118)"><path d="M-6 -9 L6 9 H-6 L6 -9 Z"/><rect x="8" y="-6" width="12" height="12"/></g>
-        <text x="300" y="122" class="small">SV</text>
+        <text x="372" y="197" text-anchor="end" class="small">CCH</text>
+        <text x="432" y="213" text-anchor="middle" class="m small" id="compA">0.0 A</text>
+        <text x="432" y="229" text-anchor="middle" class="m small" id="tTd">吐出 40 °C</text>
+        <g class="sv" id="svg-sv2" transform="translate(275 118)"><path d="M-6 -9 L6 9 H-6 L6 -9 Z"/><rect x="8" y="-6" width="12" height="12"/></g>
+        <text x="300" y="122" class="small">SV2 旁通</text>
+        <g class="sv" id="svg-sv1" transform="translate(372 160)"><rect x="-6" y="-6" width="12" height="12"/></g>
+        <text x="362" y="146" text-anchor="middle" class="small">SV1</text>
         <g transform="translate(275 190)" class="sv"><path d="M-6 -9 L6 9 H-6 L6 -9 Z"/></g>
         <text x="288" y="194" class="small">膨脹閥</text>
-        <!-- pumps -->
-        <g id="p2" transform="translate(165 85)"><circle r="13" class="eq"/><g class="rot"><path class="s2" d="M0 -9 V9 M-9 0 H9" stroke="currentColor" style="stroke:var(--ink);stroke-width:2"/></g></g>
+        <g id="p2" transform="translate(165 85)"><circle r="13" class="eq"/><g class="rot"><path d="M0 -9 V9 M-9 0 H9" style="stroke:var(--ink);stroke-width:2"/></g></g>
         <text x="146" y="89" text-anchor="end" class="small">P2</text>
         <g id="p1" transform="translate(150 240)"><circle r="13" class="eq"/><g class="rot"><path d="M0 -9 V9 M-9 0 H9" style="stroke:var(--ink);stroke-width:2"/></g></g>
         <text x="150" y="266" text-anchor="middle" class="small">P1</text>
-        <!-- flow switches -->
         <g class="fs" id="fs2" transform="translate(183 52)"><rect x="-6" y="-6" width="12" height="12" rx="2"/></g>
-        <text x="183" y="40" text-anchor="middle" class="small">FS2</text>
+        <text x="183" y="40" text-anchor="middle" class="small">F.S2</text>
         <g class="fs" id="fs1" transform="translate(123 240)"><rect x="-6" y="-6" width="12" height="12" rx="2"/></g>
-        <text x="123" y="226" text-anchor="middle" class="small">FS1</text>
-        <!-- AHU -->
+        <text x="123" y="226" text-anchor="middle" class="small">F.S1</text>
         <rect class="eq" x="20" y="212" width="90" height="72" rx="6"/>
         <text x="65" y="244" text-anchor="middle">空調箱</text>
         <text x="65" y="262" text-anchor="middle" class="small">（負載）</text>
-        <!-- temps -->
         <text x="200" y="300" class="small">冰水出水</text><text x="262" y="300" class="m" id="tTch">12.5 °C</text>
         <text x="200" y="318" class="small">冰水回水</text><text x="262" y="318" class="m" id="tTret">13.0 °C</text>
+        <text x="200" y="336" class="small">油位</text><text x="262" y="336" class="m">正常</text>
         <text x="20" y="150" class="small">冷卻水</text><text x="62" y="150" class="m" id="tTcw">28.0 °C</text>
-        <!-- gauges -->
-        <g transform="translate(500 84)" id="gHP">
-          <circle r="25" class="gface"/>
-          <g id="hpTicks"></g>
-          <line class="needle" id="hpNeedle" x1="0" y1="0" x2="0" y2="-19"/>
-          <circle r="2.5" style="fill:var(--ink)"/>
+        <g transform="translate(500 84)">
+          <circle r="25" class="gface"/><g id="hpTicks"></g>
+          <line class="needle" id="hpNeedle" x1="0" y1="0" x2="0" y2="-19"/><circle r="2.5" style="fill:var(--ink)"/>
           <text y="-31" text-anchor="middle" class="small" id="hpLbl">高壓</text>
           <text y="40" text-anchor="middle" class="m" id="hpTxt">7.5</text>
         </g>
-        <g transform="translate(430 300)" id="gLP">
-          <circle r="25" class="gface"/>
-          <g id="lpTicks"></g>
-          <line class="needle" id="lpNeedle" x1="0" y1="0" x2="0" y2="-19"/>
-          <circle r="2.5" style="fill:var(--ink)"/>
+        <text x="500" y="138" text-anchor="middle" class="small">kg/cm²</text>
+        <g transform="translate(430 300)">
+          <circle r="25" class="gface"/><g id="lpTicks"></g>
+          <line class="needle" id="lpNeedle" x1="0" y1="0" x2="0" y2="-19"/><circle r="2.5" style="fill:var(--ink)"/>
           <text x="34" y="-14" class="small" id="lpLbl">低壓</text>
           <text x="34" y="4" class="m" id="lpTxt">7.0</text>
           <text x="34" y="20" class="small">kg/cm²</text>
         </g>
-        <text x="500" y="138" text-anchor="middle" class="small">kg/cm²</text>
       </svg>
       <ul class="events" id="events"></ul>
     </div>
 
     <!-- 【故障判定】提示、看答案、判定紀錄 -->
-    <div class="card">
+    <div class="card" id="judgeCard">
       <h2>故障判定</h2>
       <div class="progress" id="progress"></div>
       <div class="jrow">
@@ -513,27 +575,19 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
     </div>
 
     <!-- 【說明文字】<details> 是可以點開／收合的區塊，文字可以直接修改 -->
-    <details class="card" open>
-      <summary>練習步驟</summary>
-      <ol>
-        <li><b>送電觀察</b>：NFB 打 ON，看哪些燈亮。按住 ON 再放開，觀察盤內元件與現場設備的動作順序。</li>
-        <li><b>比對正常順序</b>：找出「應該動作卻沒動作」的第一個元件，鎖定可疑的那一行。</li>
-        <li><b>帶電量電壓</b>：ACV 檔，黑棒固定在 N 母線，紅棒沿著線路逐點往後量。220 V 消失的地方就是斷點。</li>
-        <li><b>斷電量電阻</b>：NFB 打 OFF 後用 Ω 檔確認元件。線圈約數百 Ω，接點閉合約 0 Ω，開路顯示 OL。帶電量電阻會扣分。</li>
-        <li><b>判定</b>：切到「判定故障」，點故障元件或導線並選擇故障情形。修復後再送電試車確認正常。</li>
-      </ol>
-    </details>
     <details class="card">
       <summary>正常動作順序</summary>
       <ol>
-        <li>送電：GL 停止燈亮、CH 曲軸箱加熱器通電。</li>
-        <li>按 ON：X 吸合並自保持，GL 熄滅；MCP、MCT、MCF 吸合，兩台泵與水塔風扇運轉，RL1～RL3 亮。</li>
-        <li>水流建立後 FS1、FS2 閉合。安全連鎖（HP、LP、THC、TC）全部正常時，K 點有電。</li>
-        <li>MCM、SV、TR、MCS 同時通電：壓縮機以 Y 接線啟動，RL4 亮，CH 斷電。</li>
-        <li>TR 計時 4 秒後 MCS 釋放、MCD 吸合，切換為 Δ 運轉。</li>
-        <li>冰水出水降到 7 °C 時 TC 開路，壓縮機停機；回升到 10 °C 自動再啟動。</li>
+        <li>NFB1 送主電源：47R 檢出三相正常。NFB2 送控制電源：WL 電源燈亮、CCH 曲軸箱加熱器通電。</li>
+        <li>啟動冰水泵與冷卻水泵：F.S1、F.S2 閉合；EW 有壓差，2G5 通電；YL6 熄滅。</li>
+        <li>SW 切「近控」：10 號線有電，LO 油位正常使 2G3 → X4 → 2G4 依序動作（2G4 計時中 YL1 會短暫亮）。</li>
+        <li>按起動 PB：保護控制迴路 9～22 全通時 X1 吸合自保持。</li>
+        <li>23C1 OUT1（需冷）＋X1：2G1 再起動延時計時，時間到 6S（Y）先吸合，52C 再吸合，壓縮機 Y 啟動、GL1 亮、CCH 斷電、SV1 開。</li>
+        <li>2S 計時到：6S 釋放、42D 吸合，切換 Δ 運轉。</li>
+        <li>吐出溫度高時 23C3 閉合，2G2 以 ON 5 秒／OFF 10 秒控制 SV2 旁通降溫。</li>
+        <li>冰水降到 7 °C：23C1 切到 OUT2，GL2 亮、壓縮機停機；回升到 10 °C 自動再起動。</li>
       </ol>
-      <p>此為教學用代表性電路，元件編號與實際檢定圖可能不同。</p>
+      <p>本電路依你提供的檢定接線圖繪製。容量控制迴路（41～46 號線、CSV）尚未加入。</p>
     </details>
   </aside>
 </main>
@@ -547,15 +601,30 @@ kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border
   </div>
 </div>
 
+<!-- 【導覽】操作導覽的遮罩與說明卡片 -->
+<div class="tour" id="tour" hidden>
+  <div class="tour-hole" id="tourHole"></div>
+  <div class="tour-pop" id="tourPop" role="dialog" aria-labelledby="tourTitle">
+    <div class="step" id="tourStep"></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="acts">
+      <button class="btn" id="tourSkip">略過</button>
+      <button class="btn" id="tourPrev">上一步</button>
+      <button class="btn primary" id="tourNext">下一步</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ================================================================
    第三段：JavaScript（動作與邏輯）
    整體運作流程：
-     1. 【電路定義】用程式描述電路圖：有哪些元件、接在哪裡。
+     1. 【控制電路定義】【主電路定義】用程式描述兩張電路圖：有哪些元件、接在哪裡、線號是多少。
      2. 【啟動】畫出電路圖，出第一題，之後每 0.1 秒執行一次 tick()。
      3. tick() 每次做三件事：
           stepLogic()   算電路：哪些接點閉合、每個點幾伏特、哪些線圈吸合
-          stepPhysics() 算現場：水流、溫度、壓力，以及會不會跳脫
+          stepPhysics() 算現場：延時電驛、水流、溫度、壓力，以及會不會跳脫
           render()      把結果畫到畫面上（燈號、電表、壓力錶…）
      4. 使用者點擊時（放探棒、按按鈕、判定故障），由【事件綁定】處理。
    ================================================================ */
@@ -566,160 +635,349 @@ const $ = s => document.querySelector(s);
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 const fmtT = s => { s = Math.floor(s); return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); };
 
-/* ========== 【電路定義】 ==========
-   電路圖用「座標」描述：x 往右變大、y 往下變大（單位是像素）。
-     XL＝左邊 L 母線的 x 位置，XN＝右邊 N 母線，XC＝線圈那一排。
-   每個元件（addEl / chain 裡的一個 {...}）有這些欄位：
+/* ========== 共用：節點、元件、導線 ==========
+   節點（node）＝可以放探棒的端點。每個節點記錄：座標 x,y、在哪張圖（sheet）、線號 w。
+   元件（element）有兩個端點：「id:a」（左／上）和「id:b」（右／下）。
      id    程式內部名稱（不可重複）      label 電路圖上顯示的文字
-     kind  種類：contact 接點、pb 按鈕、coil 線圈、sol 電磁閥、lamp 指示燈、heater 電熱器、fuse 保險絲
-     ct    接點型式：NO＝a 接點（常開）、NC＝b 接點（常閉）、TDC／TDO＝限時 a／b 接點
-     owner 這個接點屬於哪個電驛（例如 'X' 代表 X 電驛的接點）
+     kind  種類：contact 接點、pb 按鈕、brk 斷路器極、coil 線圈、sol 電磁閥、lamp 指示燈、
+           heater 電熱器、fuse 保險絲、int 內部電阻（不畫出來）
+     ct    接點型式：NO＝a 接點（常開）、NC＝b 接點（常閉）
+     owner 這個接點屬於誰（例如 'X1' 代表 X1 電驛的接點）
+     timer true＝延時電驛的延時接點（畫上一個弧形記號）
      R     電阻值（Ω），量電阻時會讀到這個數字
-     name、desc  滑鼠移上去時顯示的說明
-   chain(迴路代號, y座標, 起點, [元件們], 終點) 會把元件由左到右串起來並自動接線。 */
-const XL=60, XN=1060, XC=950, XJ=900, XK=700;
+     wa / w  左端／右端的線號
+     zone  所屬迴路（提示和出題用）
+   導線（wire）連接兩個節點；hidden＝不畫出來（例如兩張圖之間的電源連線）。 */
 const NODES={}, EL={}, ELIST=[], WIRES=[];
-const RUNGS={ top:'控制電源', r1:'X 輔助電驛（啟動／自保持）', r2:'GL 停止指示燈', r3:'冰水泵 MCP 迴路', r4:'冷卻水泵 MCT 迴路',
-  r5:'冷卻水塔風扇 MCF 迴路', r6:'壓縮機安全連鎖與 MCM', r6b:'液管電磁閥 SV', r6c:'壓縮機運轉指示 RL4', r6d:'Y-Δ 限時電驛 TR',
-  r6e:'Y 接觸器 MCS', r6f:'Δ 接觸器 MCD', r7:'曲軸箱加熱器 CH', r8:'過載警報 YL', rail:'母線' };
-const RUNG_LINE={top:'電源',r1:'1',r2:'2',r3:'3–4',r4:'5–6',r5:'7–8',r6:'9',r6b:'10',r6c:'11',r6d:'12',r6e:'13',r6f:'14',r7:'15',r8:'16'};
-const LINES=[120,215,265,310,360,405,455,500,550,595,640,685,730,775,825,870];
-const lineNo = y => y===165 ? 1 : (LINES.indexOf(y)+1 || 0);
-const LEN={contact:40,pb:40,fuse:40,coil:50,sol:50,lamp:50,heater:50};
+const LEN={contact:40,pb:40,brk:40,fuse:40,coil:50,sol:50,lamp:50,heater:50,int:0};
 
-function node(id,x,y,name){ if(!NODES[id]) NODES[id]={id,x,y,name}; return id; }
+function node(id,x,y,sheet,w,desc){
+  if(!NODES[id]) NODES[id]={id,x,y,sheet,w:w||'',desc:desc||''};
+  return id;
+}
+function nodeName(id){
+  const n=NODES[id]; const pre=n.sheet==='main'?'主電路 ':'';
+  return n.w ? `${pre}${n.w} 號線（${n.desc}）` : pre+n.desc;
+}
 function addEl(o){
-  o.len=LEN[o.kind]; o.fault=false; EL[o.id]=o; ELIST.push(o);
-  const ln = lineNo(o.y1); const suf = ln ? ' · 第'+ln+'行' : '';
-  node(o.id+':a',o.x1,o.y1,o.label+' ①'+suf); node(o.id+':b',o.x2,o.y2,o.label+' ②'+suf);
+  o.sheet=o.sheet||'ctrl'; o.len=LEN[o.kind]; o.fault=false;
+  EL[o.id]=o; ELIST.push(o);
+  const vert=o.x1===o.x2;
+  node(o.id+':a',o.x1,o.y1,o.sheet,o.wa,o.label+(vert?' 上端':' 左端'));
+  node(o.id+':b',o.x2,o.y2,o.sheet,o.w,o.label+(vert?' 下端':' 右端'));
 }
 let wn=0;
-function wire(a,b,rung,opt={}){ WIRES.push({id:'W'+(++wn),a,b,rung,pts:opt.pts||null,breakable:opt.breakable!==false,fault:false}); }
-function chain(rung,y,start,items,end){
-  let prev=start;
-  for(const it of items){ const len=LEN[it.kind]; addEl(Object.assign({rung,x1:it.x,y1:y,x2:it.x+len,y2:y},it)); wire(prev,it.id+':a',rung); prev=it.id+':b'; }
-  if(end) wire(prev,end,rung);
+function wire(a,b,zone,opt={}){
+  WIRES.push({id:'W'+(++wn),a,b,zone,pts:opt.pts||null,breakable:opt.breakable!==false,hidden:!!opt.hidden,fault:false});
+}
+/* row(迴路, y座標, 起點, [元件…], 終點)：把元件由左到右串起來並自動接線。
+   每個元件的 w（右端線號）沒寫時，最後一個元件會沿用終點的線號。 */
+function row(zone,y,start,items,end){
+  let prev=start, pw=NODES[start].w;
+  items.forEach((it,i)=>{
+    const len=LEN[it.kind];
+    const w = it.w!==undefined ? it.w : (i===items.length-1 && end ? NODES[end].w : '');
+    addEl(Object.assign({zone,x1:it.x,y1:y,x2:it.x+len,y2:y,wa:pw},it,{w}));
+    wire(prev,it.id+':a',zone);
+    prev=it.id+':b'; pw=w;
+  });
+  if(end) wire(prev,end,zone);
   return prev;
 }
-const Lj = y => node('L'+y,XL,y,'L 母線');
-const Nj = y => node('N'+y,XN,y,'N 母線');
-const J = (id,x,y,name) => node(id,x,y,name+' · 第'+lineNo(y)+'行');
 
-node('SRC_L',XL,34,'電源 R 端（NFB 二次側）'); node('SRC_N',XN,34,'電源 S 端（NFB 二次側）');
-addEl({id:'F',kind:'fuse',label:'F',name:'控制電路保險絲',rung:'top',x1:XL,y1:56,x2:XL,y2:96});
-wire('SRC_L','F:a','top',{breakable:false}); wire('F:b',Lj(120),'top',{breakable:false}); wire('SRC_N',Nj(120),'top',{breakable:false});
+/* ========== 【控制電路定義】 ==========
+   依檢定接線圖繪製。L 母線＝1 號線（左，經 R 相 NFB2、D-FUSE），
+   N 母線＝2 號線（右，經 T 相 NFB2、D-FUSE、E-STOP）。控制電壓 AC 220 V。
+   XL＝左母線 x、XN＝右母線 x、XC＝線圈與指示燈那一排。 */
+const XL=60, XN=1180, XC=1090;
+const C='ctrl';
+const L=y=>node('L'+y,XL,y,C,'1','L 母線');
+const N=y=>node('N'+y,XN,y,C,'2','N 母線');
+const J=(id,x,y,w,desc)=>node(id,x,y,C,w,desc||'接點');
+const DESC=[]; // 電路圖右側的文字說明 [y, 文字]
+const d=(y,t)=>DESC.push([y,t]);
 
-// 第1行 X
-chain('r1',120,Lj(120),[
-  {id:'E3',kind:'contact',ct:'NC',owner:'3E',x:100,label:'3E',name:'3E 保護電驛接點 (95-96)',desc:'欠相、逆相、過電流保護，正常時閉合。'},
-  {id:'OFF',kind:'pb',ct:'NC',owner:'PBOFF',x:180,label:'PB-OFF',name:'停止按鈕（b 接點）'}], J('J1a',250,120,'PB-OFF 與 PB-ON 之間'));
-chain('r1',120,'J1a',[{id:'ON',kind:'pb',ct:'NO',owner:'PBON',x:280,label:'PB-ON',name:'啟動按鈕（a 接點）'}], J('J1b',380,120,'X 線圈前端'));
-chain('r1',120,'J1b',[{id:'Xc',kind:'coil',relay:'X',R:1200,x:XC,label:'X',name:'X 輔助電驛線圈'}],Nj(120));
-addEl({id:'Xa1',kind:'contact',ct:'NO',owner:'X',rung:'r1',x1:280,y1:165,x2:320,y2:165,label:'X-a',name:'X 自保持接點（a 接點）',desc:'放開 ON 後由此接點維持 X 通電。'});
-wire('J1a','Xa1:a','r1'); wire('Xa1:b','J1b','r1',{pts:[[380,165]]});
-// 第2行 GL
-chain('r2',215,Lj(215),[
-  {id:'Xb1',kind:'contact',ct:'NC',owner:'X',x:100,label:'X-b',name:'X 輔助電驛 b 接點'},
-  {id:'GL',kind:'lamp',R:2400,x:XC,label:'GL',name:'停止指示燈（綠）'}],Nj(215));
-// 泵與風扇
-function pumpRung(r,y,xa,th,thName,mc,mcName,rl,rlName){
-  chain(r,y,Lj(y),[
-    {id:xa,kind:'contact',ct:'NO',owner:'X',x:100,label:'X-a',name:'X 輔助電驛 a 接點'},
-    {id:th,kind:'contact',ct:'NC',owner:th,x:180,label:th,name:thName}], J('J'+y,XJ,y,mc+' 線圈前端'));
-  chain(r,y,'J'+y,[{id:mc+'c',kind:'coil',relay:mc,R:380,x:XC,label:mc,name:mcName}],Nj(y));
-  addEl({id:rl,kind:'lamp',R:2400,rung:r,x1:XC,y1:y+45,x2:XC+50,y2:y+45,label:rl,name:rlName});
-  wire('J'+y,rl+':a',r); wire(rl+':b',Nj(y+45),r);
-}
-pumpRung('r3',265,'Xa2','THP','冰水泵過載電驛接點 (95-96)','MCP','冰水泵電磁接觸器線圈','RL1','冰水泵運轉指示燈');
-pumpRung('r4',360,'Xa3','THT','冷卻水泵過載電驛接點 (95-96)','MCT','冷卻水泵電磁接觸器線圈','RL2','冷卻水泵運轉指示燈');
-pumpRung('r5',455,'Xa4','THF','冷卻水塔風扇過載電驛接點 (95-96)','MCF','冷卻水塔風扇電磁接觸器線圈','RL3','冷卻水塔風扇運轉指示燈');
-// 第9行 安全連鎖
-const chainItems=[
-  {id:'Xa5',owner:'X',ct:'NO',label:'X-a',name:'X 輔助電驛 a 接點'},
-  {id:'MCPa',owner:'MCP',ct:'NO',label:'MCP-a',name:'冰水泵接觸器輔助 a 接點'},
-  {id:'FS1',owner:'FS1',ct:'NO',label:'FS1',tag:'F',name:'冰水流量開關',desc:'冰水有水流時閉合。'},
-  {id:'MCTa',owner:'MCT',ct:'NO',label:'MCT-a',name:'冷卻水泵接觸器輔助 a 接點'},
-  {id:'FS2',owner:'FS2',ct:'NO',label:'FS2',tag:'F',name:'冷卻水流量開關',desc:'冷卻水有水流時閉合。'},
-  {id:'HP',owner:'HP',ct:'NC',label:'HP',tag:'P',name:'高壓開關',desc:'排氣壓力 ≥ 20 kg/cm² 跳脫，需手動復歸。'},
-  {id:'LP',owner:'LP',ct:'NO',label:'LP',tag:'P',name:'低壓開關',desc:'吸氣壓力 ≤ 1.5 kg/cm² 開路，回升至 3.0 自動復歸。'},
-  {id:'THC',owner:'THC',ct:'NC',label:'THC',name:'壓縮機過載電驛接點 (95-96)'},
-  {id:'TC',owner:'TC',ct:'NO',label:'TC',tag:'T',name:'冰水溫度開關',desc:'冰水出水 ≥ 10 °C 閉合，≤ 7 °C 開路。'}
-].map((o,i)=>Object.assign({kind:'contact',x:100+i*60},o));
-chain('r6',550,Lj(550),chainItems,J('K550',XK,550,'K 點（安全連鎖輸出）'));
-chain('r6',550,'K550',[{id:'MCMc',kind:'coil',relay:'MCM',R:300,x:XC,label:'MCM',name:'壓縮機主接觸器線圈'}],Nj(550));
-let prevK='K550';
-for(const [y,r] of [[595,'r6b'],[640,'r6c'],[685,'r6d'],[730,'r6e'],[775,'r6f']]){ const k=J('K'+y,XK,y,'K 點'); wire(prevK,k,r); prevK=k; }
-chain('r6b',595,'K595',[{id:'SVc',kind:'sol',relay:'SV',R:1500,x:XC,label:'SV',name:'液管電磁閥線圈',desc:'通電開啟，讓冷媒液流向膨脹閥。'}],Nj(595));
-chain('r6c',640,'K640',[{id:'RL4',kind:'lamp',R:2400,x:XC,label:'RL4',name:'壓縮機運轉指示燈'}],Nj(640));
-chain('r6d',685,'K685',[{id:'TRc',kind:'coil',relay:'TR',R:4000,x:XC,label:'TR',name:'Y-Δ 限時電驛線圈',desc:'通電 4 秒後延時接點動作。'}],Nj(685));
-chain('r6e',730,'K730',[
-  {id:'TRb',kind:'contact',ct:'TDO',owner:'TR',x:740,label:'TR-b',name:'TR 限時開路 b 接點'},
-  {id:'MCDb',kind:'contact',ct:'NC',owner:'MCD',x:820,label:'MCD-b',name:'MCD 互鎖 b 接點'},
-  {id:'MCSc',kind:'coil',relay:'MCS',R:340,x:XC,label:'MCS',name:'Y 接觸器線圈'}],Nj(730));
-chain('r6f',775,'K775',[
-  {id:'TRa',kind:'contact',ct:'TDC',owner:'TR',x:740,label:'TR-a',name:'TR 限時閉合 a 接點'},
-  {id:'MCSb',kind:'contact',ct:'NC',owner:'MCS',x:820,label:'MCS-b',name:'MCS 互鎖 b 接點'},
-  {id:'MCDc',kind:'coil',relay:'MCD',R:340,x:XC,label:'MCD',name:'Δ 接觸器線圈'}],Nj(775));
-chain('r7',825,Lj(825),[
-  {id:'MCMb',kind:'contact',ct:'NC',owner:'MCM',x:100,label:'MCM-b',name:'MCM b 接點'},
-  {id:'CH',kind:'heater',R:806,x:XC,label:'CH',name:'曲軸箱加熱器',desc:'壓縮機停機時通電保溫，避免冷媒溶入冷凍油。'}],Nj(825));
-chain('r8',870,Lj(870),[
-  {id:'THCal',kind:'contact',ct:'NO',owner:'THC',x:100,label:'THC 97-98',name:'壓縮機過載電驛警報 a 接點'},
-  {id:'YL',kind:'lamp',R:2400,x:XC,label:'YL',name:'過載警報燈（黃）'}],Nj(870));
-// 母線
+// --- 控制電源 ---
+node('cR',XL,30,C,'R','控制電源 R 相（NFB2 電源側）');
+node('cT',XN,30,C,'T','控制電源 T 相（NFB2 電源側）');
+addEl({id:'NFB2R',kind:'brk',owner:'NFB2',label:'NFB2',name:'控制電源無熔絲開關 R 極',zone:'控制電源',x1:XL,y1:44,x2:XL,y2:84,wa:'R',w:'R0'});
+addEl({id:'NFB2T',kind:'brk',owner:'NFB2',label:'NFB2',name:'控制電源無熔絲開關 T 極',zone:'控制電源',x1:XN,y1:44,x2:XN,y2:84,wa:'T',w:'T0'});
+addEl({id:'DF1',kind:'fuse',label:'D-FUSE',name:'控制電路栓型保險絲（R 側）',zone:'控制電源',x1:XL,y1:100,x2:XL,y2:140,wa:'R0',w:'1'});
+addEl({id:'DF2',kind:'fuse',label:'D-FUSE',name:'控制電路栓型保險絲（T 側）',zone:'控制電源',x1:XN,y1:100,x2:XN,y2:140,wa:'T0',w:'02'});
+addEl({id:'ESTOP',kind:'pb',ct:'NC',owner:'ESTOP',label:'E-STOP',name:'緊急開關（b 接點）',zone:'控制電源',x1:XN,y1:150,x2:XN,y2:190,wa:'02',w:'2'});
+wire('cR','NFB2R:a','控制電源',{breakable:false}); wire('NFB2R:b','DF1:a','控制電源');
+wire('cT','NFB2T:a','控制電源',{breakable:false}); wire('NFB2T:b','DF2:a','控制電源'); wire('DF2:b','ESTOP:a','控制電源');
+wire('DF1:b',L(210),'控制電源',{breakable:false}); wire('ESTOP:b',N(210),'控制電源',{breakable:false});
+
+// --- 電源燈、曲軸箱加熱器、回油／旁通電磁閥 ---
+row('電源指示',210,L(210),[{id:'WL',kind:'lamp',R:2400,x:XC,label:'WL',name:'電源指示燈'}],N(210)); d(210,'WL 電源燈');
+row('曲軸箱加熱',255,L(255),[
+  {id:'52Cb1',kind:'contact',ct:'NC',owner:'52C',x:200,label:'52C',w:'3',name:'52C b 接點（停機時加熱）'},
+  {id:'CCH',kind:'heater',R:806,x:XC,label:'CCH',name:'曲軸箱加熱器'}],N(255)); d(255,'CCH 曲軸箱加熱器');
+J('J4u',330,300,'4','SV1 前端');
+row('回油電磁閥',300,'J4u',[{id:'SV1',kind:'sol',R:1500,x:XC,label:'SV1',name:'回油電磁閥 (LSV1)'}],N(300)); d(300,'SV1 回油電磁閥');
+row('旁通控制',345,L(345),[{id:'52Ca1',kind:'contact',ct:'NO',owner:'52C',x:200,label:'52C',w:'4',name:'52C a 接點'}],J('J4',330,345,'4'));
+wire('J4','J4u','回油電磁閥');
+row('旁通控制',345,'J4',[{id:'23C3',kind:'contact',ct:'NO',owner:'23C3',tag:'T',x:480,label:'23C3',w:'5',name:'高壓吐出溫度開關',desc:'吐出溫度 ≥ 95 °C 閉合，≤ 85 °C 開路。'}],J('J5',640,345,'5'));
+row('旁通控制',345,'J5',[{id:'2G2c',kind:'coil',relay:'2G2',R:4000,x:XC,label:'2G2',name:'ATDV 雙延時電驛線圈 (ON 5 s／OFF 10 s)'}],N(345)); d(345,'2G2 雙延時 ON5s/OFF10s');
+J('J5d',640,390,'5'); wire('J5','J5d','旁通控制');
+row('旁通控制',390,'J5d',[
+  {id:'2G2a',kind:'contact',ct:'NO',owner:'2G2',timer:true,x:720,label:'2G2',w:'6',name:'2G2 延時 a 接點'},
+  {id:'SV2',kind:'sol',R:1500,x:XC,label:'SV2',name:'旁通電磁閥 (LSV2)'}],N(390)); d(390,'SV2 旁通電磁閥');
+
+// --- 冰水水壓差 EW ---
+row('冰水水壓差',435,L(435),[
+  {id:'EW',kind:'contact',ct:'NO',owner:'EW',tag:'P',x:420,label:'EW',w:'7',name:'冰水水壓差開關（a 側）',desc:'冰水泵運轉、有壓差時閉合。'},
+  {id:'2G5c',kind:'coil',relay:'2G5',R:4000,x:XC,label:'2G5',name:'水壓差延時電驛線圈 (OFF 60 s)'}],N(435)); d(435,'2G5 水壓差 OFF 60s');
+row('冰水水壓差',480,L(480),[
+  {id:'EWb',kind:'contact',ct:'NC',owner:'EW',tag:'P',x:420,label:'EW',w:'8',name:'冰水水壓差開關（b 側）'},
+  {id:'YL6',kind:'lamp',R:2400,x:XC,label:'YL6',name:'冰水水壓差異常燈'}],N(480)); d(480,'YL6 冰水水壓差異常');
+
+// --- 油位保護（由 10 號線供電） ---
+J('J10u1',300,525,'10'); J('J10u2',300,570,'10'); J('J10u3',300,615,'10'); J('J10u4',300,660,'10');
+row('油位保護',525,'J10u1',[
+  {id:'LO',kind:'contact',ct:'NO',owner:'LO',tag:'L',x:420,label:'LO',w:'23',name:'低油位開關',desc:'油位正常時閉合。'},
+  {id:'2G3c',kind:'coil',relay:'2G3',R:4000,x:XC,label:'2G3',name:'低油位延時電驛線圈 (OFF 60 s)'}],N(525)); d(525,'2G3 低油位 OFF 60s');
+row('油位保護',570,'J10u2',[
+  {id:'2G3a',kind:'contact',ct:'NO',owner:'2G3',timer:true,x:420,label:'2G3',w:'24',name:'2G3 延時 a 接點'},
+  {id:'X4c',kind:'coil',relay:'X4',R:1200,x:XC,label:'X4',name:'X4 輔助電驛線圈'}],N(570)); d(570,'X4');
+row('油位保護',615,'J10u3',[
+  {id:'X4a',kind:'contact',ct:'NO',owner:'X4',x:420,label:'X4',w:'25',name:'X4 a 接點'},
+  {id:'2G4c',kind:'coil',relay:'2G4',R:4000,x:XC,label:'2G4',name:'油位延時電驛線圈 (60 s)'}],N(615)); d(615,'2G4 油位 60s');
+row('油位保護',660,'J10u4',[
+  {id:'2G4b',kind:'contact',ct:'NC',owner:'2G4',timer:true,x:420,label:'2G4',w:'',name:'2G4 延時 b 接點'},
+  {id:'YL1',kind:'lamp',R:2400,x:XC,label:'YL1',name:'油位過低異常燈'}],N(660)); d(660,'YL1 油位過低異常');
+
+// --- 保護控制迴路（主線 1 → 22，X1） ---
+row('保護控制迴路',700,L(700),[
+  {id:'FS1',kind:'contact',ct:'NO',owner:'FS1',tag:'F',x:80,label:'F.S1',w:'9',name:'冰水流量開關',desc:'冰水泵運轉有水流時閉合。'},
+  {id:'FS2',kind:'contact',ct:'NO',owner:'FS2',tag:'F',x:140,label:'F.S2',w:'09',name:'冷卻水流量開關'}],J('J09',190,700,'09'));
+row('保護控制迴路',700,'J09',[{id:'X3a1',kind:'contact',ct:'NO',owner:'X3',x:205,label:'X3',w:'10',name:'X3 a 接點（遠控）'}],J('J10a',265,700,'10'));
+J('J10',300,700,'10','保護控制迴路'); wire('J10a','J10','保護控制迴路');
+wire('J10','J10u4','油位保護'); wire('J10u4','J10u3','油位保護'); wire('J10u3','J10u2','油位保護'); wire('J10u2','J10u1','油位保護');
+J('J09d',190,745,'09');
+wire('J09','J09d','選擇開關');
+addEl({id:'SWN',kind:'contact',ct:'NO',owner:'SWN',zone:'選擇開關',x1:205,y1:745,x2:245,y2:745,wa:'09',w:'10',label:'SW近控',name:'選擇開關「近控」接點'});
+wire('J09d','SWN:a','選擇開關'); wire('SWN:b','J10a','選擇開關',{pts:[[265,745]]});
+addEl({id:'SWR',kind:'contact',ct:'NO',owner:'SWR',zone:'遠控',x1:205,y1:790,x2:245,y2:790,wa:'09',w:'C',label:'SW遠控',name:'選擇開關「遠控」接點'});
+wire('J09d','SWR:a','遠控',{breakable:false});
+addEl({id:'REM',kind:'contact',ct:'NO',owner:'REM',zone:'遠控',x1:255,y1:790,x2:295,y2:790,wa:'C',w:'F',label:'F',name:'遠控接點 F（端子 C-F）'});
+wire('SWR:b','REM:a','遠控',{breakable:false});
+J('JF',310,790,'F','遠控接點後'); wire('REM:b','JF','遠控',{breakable:false});
+row('保護控制迴路',700,'J10',[
+  {id:'26W',kind:'contact',ct:'NC',owner:'26W',tag:'T',x:340,label:'26W',w:'11',name:'防凍開關',desc:'冰水 ≤ 3 °C 跳脫。'},
+  {id:'PBOFF',kind:'pb',ct:'NC',owner:'PBOFF',x:400,label:'PB停止',w:'12',name:'停止按鈕（b 接點）'},
+  {id:'47R',kind:'contact',ct:'NC',owner:'47R',x:470,label:'47R',w:'13',name:'限電壓控制器（相序／欠相）',desc:'主電源三相正常時閉合。'},
+  {id:'X2b',kind:'contact',ct:'NC',owner:'X2',x:530,label:'X2',w:'14',name:'X2 b 接點'},
+  {id:'51C',kind:'contact',ct:'NC',owner:'51C',x:590,label:'51C',w:'15',name:'過載電驛',desc:'過載或缺相時跳脫，需手動復歸。'},
+  {id:'63HR',kind:'contact',ct:'NC',owner:'63HR',tag:'P',x:650,label:'63HR',w:'16',name:'高壓開關（手動復歸）',desc:'≥ 20 kg/cm² 跳脫。'},
+  {id:'63LP',kind:'contact',ct:'NO',owner:'63LP',tag:'P',x:710,label:'63LP',w:'17',name:'低壓開關',desc:'≤ 1.5 kg/cm² 開路，≥ 3.0 自動復歸。'},
+  {id:'2G4a',kind:'contact',ct:'NO',owner:'2G4',timer:true,x:770,label:'2G4',w:'18',name:'2G4 延時 a 接點'},
+  {id:'2G5a',kind:'contact',ct:'NO',owner:'2G5',timer:true,x:830,label:'2G5',w:'19',name:'2G5 延時 a 接點（OFF 延時）'},
+  {id:'23C4',kind:'contact',ct:'NC',owner:'23C4',tag:'T',x:890,label:'23C4',w:'20',name:'低壓回流管溫度開關'},
+  {id:'49C',kind:'contact',ct:'NC',owner:'49C',x:945,label:'49C',w:'21',name:'內載式過電流器',desc:'壓縮機內部過熱（吐出 ≥ 115 °C）動作，自動復歸。'}],J('J21',995,700,'21'));
+row('保護控制迴路',700,'J21',[{id:'PBON',kind:'pb',ct:'NO',owner:'PBON',x:1005,label:'PB起動',w:'22',name:'起動按鈕（a 接點）'}],J('J22',1062,700,'22'));
+row('保護控制迴路',700,'J22',[{id:'X1c',kind:'coil',relay:'X1',R:1200,x:XC,label:'X1',name:'X1 主控輔助電驛線圈'}],N(700)); d(700,'X1 主控電驛');
+J('J21d',995,745,'21'); J('J22d',1062,745,'22');
+wire('J21','J21d','保護控制迴路'); wire('J22d','J22','保護控制迴路');
+addEl({id:'X1a1',kind:'contact',ct:'NO',owner:'X1',zone:'保護控制迴路',x1:1005,y1:745,x2:1045,y2:745,wa:'21',w:'22',label:'X1',name:'X1 自保持 a 接點'});
+wire('J21d','X1a1:a','保護控制迴路'); wire('X1a1:b','J22d','保護控制迴路');
+addEl({id:'X3a2',kind:'contact',ct:'NO',owner:'X3',zone:'遠控',x1:1005,y1:790,x2:1045,y2:790,wa:'21',w:'22',label:'X3',name:'X3 a 接點（遠控起動）'});
+wire('J21d','X3a2:a','遠控',{breakable:false}); wire('X3a2:b','J22d','遠控',{breakable:false,pts:[[1062,790]]});
+
+// --- 異常指示（各保護元件的另一側接點） ---
+row('異常指示',835,'23C4:a',[{id:'23C4n',kind:'contact',ct:'NO',owner:'23C4',x:910,label:'23C4',w:'32',name:'23C4 異常側接點'},
+  {id:'YL7',kind:'lamp',R:2400,x:XC,label:'YL7',name:'低壓回流管過低異常燈'}],N(835)); d(835,'YL7 低壓回流管過低');
+row('異常指示',880,'63LP:a',[{id:'63LPn',kind:'contact',ct:'NC',owner:'63LP',x:730,label:'63LP',w:'26',name:'63LP 異常側接點'},
+  {id:'YL2',kind:'lamp',R:2400,x:XC,label:'YL2',name:'低壓過低異常燈'}],N(880)); d(880,'YL2 低壓過低');
+row('異常指示',925,'63HR:a',[{id:'63HRn',kind:'contact',ct:'NO',owner:'63HR',x:670,label:'63HR',w:'27',name:'63HR 異常側接點'},
+  {id:'YL3',kind:'lamp',R:2400,x:XC,label:'YL3',name:'高壓過高異常燈'}],N(925)); d(925,'YL3 高壓過高');
+row('異常指示',970,'51C:a',[{id:'51Cn',kind:'contact',ct:'NO',owner:'51C',x:610,label:'51C',w:'28',name:'51C 異常側接點'},
+  {id:'YL4',kind:'lamp',R:2400,x:XC,label:'YL4',name:'馬達過熱異常燈'}],N(970)); d(970,'YL4 馬達過熱');
+J('J12a',470,1015,'12'); wire('47R:a','J12a','異常指示');
+row('異常指示',1015,'J12a',[{id:'47Rn',kind:'contact',ct:'NO',owner:'47R',x:490,label:'47R',w:'29',name:'47R 異常側接點'}],J('J29',560,1015,'29'));
+row('異常指示',1015,'J29',[{id:'RL1',kind:'lamp',R:2400,x:XC,label:'RL1',name:'電壓相序異常燈'}],N(1015)); d(1015,'RL1 電壓相序異常');
+J('J12b',470,1060,'12'); wire('J12a','J12b','異常指示');
+row('異常指示',1060,'J12b',[{id:'X2a',kind:'contact',ct:'NO',owner:'X2',x:490,label:'X2',w:'29',name:'X2 自保持 a 接點'}],J('J29b',560,1060,'29'));
+wire('J29b','J29','異常指示');
+J('J29c',560,1100,'29'); wire('J29b','J29c','異常指示');
+row('異常指示',1100,'J29c',[{id:'X2c',kind:'coil',relay:'X2',R:1200,x:XC,label:'X2',name:'X2 相序異常保持電驛線圈'}],N(1100)); d(1100,'X2 相序異常保持');
+row('異常指示',1140,'26W:a',[{id:'26Wn',kind:'contact',ct:'NO',owner:'26W',x:360,label:'26W',w:'30',name:'26W 異常側接點'},
+  {id:'YL5',kind:'lamp',R:2400,x:XC,label:'YL5',name:'冰水溫度過低異常燈'}],N(1140)); d(1140,'YL5 冰水溫度過低');
+row('遠控',1185,'JF',[{id:'X3c',kind:'coil',relay:'X3',R:1200,x:XC,label:'X3',name:'X3 遠控電驛線圈'}],N(1185)); d(1185,'X3 遠控電驛');
+
+// --- 主機控制迴路（23C1 溫度控制、Y-Δ 起動） ---
+row('溫度控制',1240,L(1240),[
+  {id:'OUT2',kind:'contact',ct:'NO',owner:'OUT2',tag:'T',x:120,label:'23C1 OUT2',w:'31',name:'冰水回水溫度控制器 OUT2（溫度到達）'},
+  {id:'GL2',kind:'lamp',R:2400,x:XC,label:'GL2',name:'溫度到達停機指示燈'}],N(1240)); d(1240,'GL2 溫度到達停機');
+row('主機控制迴路',1285,L(1285),[
+  {id:'OUT1',kind:'contact',ct:'NO',owner:'OUT1',tag:'T',x:120,label:'23C1 OUT1',w:'33',name:'冰水回水溫度控制器 OUT1（需冷卻）',desc:'冰水 ≥ 10 °C 閉合，≤ 7 °C 切到 OUT2。'},
+  {id:'X1a2',kind:'contact',ct:'NO',owner:'X1',x:300,label:'X1',w:'34',name:'X1 a 接點'}],J('J34',400,1285,'34'));
+row('主機控制迴路',1285,'J34',[{id:'2G1a',kind:'contact',ct:'NO',owner:'2G1',timer:true,x:440,label:'2G1',w:'35',name:'2G1 延時 a 接點（再起動延時）'}],J('J35',540,1285,'35'));
+row('主機控制迴路',1285,'J35',[{id:'6Sa',kind:'contact',ct:'NO',owner:'6S',x:600,label:'6S',w:'36',name:'6S a 接點'}],J('J36',860,1285,'36'));
+row('主機控制迴路',1285,'J36',[{id:'52Cc',kind:'coil',relay:'52C',R:300,x:XC,label:'52C',name:'52C 主接觸器線圈 (MCM)'}],N(1285)); d(1285,'52C 主接觸器 MCM');
+J('J35a',540,1330,'35'); J('J36a',860,1330,'36');
+wire('J35','J35a','主機控制迴路'); wire('J36a','J36','主機控制迴路');
+row('主機控制迴路',1330,'J35a',[{id:'52Ca2',kind:'contact',ct:'NO',owner:'52C',x:600,label:'52C',w:'36',name:'52C 自保持 a 接點'}],'J36a');
+J('J36b',860,1375,'36'); J('J36c',860,1420,'36'); J('J36d',860,1465,'36');
+wire('J36a','J36b','Y-Δ 起動'); wire('J36b','J36c','運轉指示'); wire('J36c','J36d','Y-Δ 起動');
+row('Y-Δ 起動',1375,'J36b',[{id:'2Sc',kind:'coil',relay:'2S',R:4000,x:XC,label:'2S',name:'Y-Δ 限時電驛線圈 2S (3～5 s)'}],N(1375)); d(1375,'2S Y-Δ 3~5s');
+row('運轉指示',1420,'J36c',[{id:'GL1',kind:'lamp',R:2400,x:XC,label:'GL1',name:'運轉指示燈'}],N(1420)); d(1420,'GL1 運轉');
+row('Y-Δ 起動',1465,'J36d',[{id:'2G6c',kind:'coil',relay:'2G6',R:4000,x:XC,label:'2G',name:'時間電驛 2G (30 s)'}],N(1465)); d(1465,'2G 30s');
+J('J35b',540,1510,'35'); J('J35c',540,1555,'35');
+wire('J35a','J35b','Y-Δ 起動'); wire('J35b','J35c','Y-Δ 起動');
+row('Y-Δ 起動',1510,'J35b',[
+  {id:'2Sb',kind:'contact',ct:'NC',owner:'2S',timer:true,x:600,label:'2S',w:'37',name:'2S 延時 b 接點'},
+  {id:'42Db',kind:'contact',ct:'NC',owner:'42D',x:720,label:'42D',w:'38',name:'42D 互鎖 b 接點'},
+  {id:'6Sc',kind:'coil',relay:'6S',R:340,x:XC,label:'6S',name:'6S Y 接觸器線圈 (MCS)'}],N(1510)); d(1510,'6S Y 接觸器 MCS');
+row('Y-Δ 起動',1555,'J35c',[
+  {id:'2Sa',kind:'contact',ct:'NO',owner:'2S',timer:true,x:600,label:'2S',w:'39',name:'2S 延時 a 接點'},
+  {id:'6Sb',kind:'contact',ct:'NC',owner:'6S',x:720,label:'6S',w:'40',name:'6S 互鎖 b 接點'},
+  {id:'42Dc',kind:'coil',relay:'42D',R:340,x:XC,label:'42D',name:'42D Δ 接觸器線圈 (MCD)'}],N(1555)); d(1555,'42D Δ 接觸器 MCD');
+J('J34a',400,1600,'34'); wire('J34','J34a','再起動延時');
+row('再起動延時',1600,'J34a',[{id:'2G1c',kind:'coil',relay:'2G1',R:4000,x:XC,label:'2G1',name:'再起動延時電驛線圈 2G1 (6 min)'}],N(1600)); d(1600,'2G1 再起動 6min');
+
+// 母線：把同一條母線上的節點由上到下連起來
 for(const pre of ['L','N']){
   const ys=Object.keys(NODES).filter(k=>new RegExp('^'+pre+'\\d+$').test(k)).map(k=>+k.slice(1)).sort((a,b)=>a-b);
-  for(let i=0;i<ys.length-1;i++) wire(pre+ys[i],pre+ys[i+1],'rail',{breakable:false});
+  for(let i=0;i<ys.length-1;i++) wire(pre+ys[i],pre+ys[i+1],'母線',{breakable:false});
 }
 
+/* ========== 【主電路定義】 ==========
+   3φ 220 V：R、S、T → NFB1 → MCM(52C) → 壓縮機 1、2、3；
+   MCS(6S) 把 6、4、5 短接成 Y；MCD(42D) 把 R→6、S→4、T→5 接成 Δ。
+   47R 接在 NFB1 二次側檢出缺相。檢定圖上的 MCR 沒有對應的控制線圈，這裡省略。 */
+const M='main';
+const PHY={R:90,S:170,T:250};
+node('mR',40,PHY.R,M,'R','R 相電源（NFB1 電源側）');
+node('mS',40,PHY.S,M,'S','S 相電源（NFB1 電源側）');
+node('mT',40,PHY.T,M,'T','T 相電源（NFB1 電源側）');
+wire('cR','mR','電源',{breakable:false,hidden:true});
+wire('cT','mT','電源',{breakable:false,hidden:true});
+const MZ={R:'主電路 R 相',S:'主電路 S 相',T:'主電路 T 相'};
+const tapX={R:200,S:220,T:240}, t47X={R:290,S:310,T:330};
+const termL={R:'1',S:'2',T:'3'}, termR={R:'6',S:'4',T:'5'};
+for(const p of ['R','S','T']){
+  const y=PHY[p], z=MZ[p];
+  addEl({id:'NFB1'+p,sheet:M,kind:'brk',owner:'NFB1',label:p==='R'?'NFB1':'',name:`主電源無熔絲開關 ${p} 極`,zone:z,x1:90,y1:y,x2:130,y2:y,wa:p,w:p+'1'});
+  wire('m'+p,'NFB1'+p+':a',z,{breakable:false});
+  node('tap'+p,tapX[p],y,M,p+'1','MCD 分岐點');
+  node('t47'+p,t47X[p],y,M,p+'1','47R 分岐點');
+  wire('NFB1'+p+':b','tap'+p,z); wire('tap'+p,'t47'+p,z);
+  addEl({id:'MCM'+p,sheet:M,kind:'contact',ct:'NO',owner:'52C',label:p==='R'?'MCM (52C)':'',name:`MCM 主接點 ${p} 相`,zone:z,x1:430,y1:y,x2:470,y2:y,wa:p+'1',w:termL[p]});
+  wire('t47'+p,'MCM'+p+':a',z);
+  node('M'+termL[p],620,y,M,termL[p],'壓縮機端子 '+termL[p]);
+  wire('MCM'+p+':b','M'+termL[p],z);
+  node('M'+termR[p],780,y,M,termR[p],'壓縮機端子 '+termR[p]);
+  node('J'+termR[p]+'m',840,y,M,termR[p],'MCD 接入點');
+  wire('M'+termR[p],'J'+termR[p]+'m',z);
+  addEl({id:'MCS'+p,sheet:M,kind:'contact',ct:'NO',owner:'6S',label:p==='R'?'MCS (6S)':'',name:`MCS 主接點（端子 ${termR[p]}）`,zone:z,x1:880,y1:y,x2:920,y2:y,wa:termR[p],w:'Y'});
+  wire('J'+termR[p]+'m','MCS'+p+':a',z);
+  node('ST'+p,980,y,M,'Y','Y 結線短接點');
+  wire('MCS'+p+':b','ST'+p,z);
+}
+wire('STR','STS','主電路 Y 結線',{breakable:false}); wire('STS','STT','主電路 Y 結線',{breakable:false});
+// 壓縮機繞組（內部電阻，不畫符號）：1-4、2-5、3-6
+addEl({id:'WU',sheet:M,kind:'int',R:0.6,label:'繞組 1-4',name:'壓縮機繞組 1-4',zone:'壓縮機',x1:620,y1:PHY.R,x2:780,y2:PHY.S,wa:'1',w:'4'});
+addEl({id:'WV',sheet:M,kind:'int',R:0.6,label:'繞組 2-5',name:'壓縮機繞組 2-5',zone:'壓縮機',x1:620,y1:PHY.S,x2:780,y2:PHY.T,wa:'2',w:'5'});
+addEl({id:'WW',sheet:M,kind:'int',R:0.6,label:'繞組 3-6',name:'壓縮機繞組 3-6',zone:'壓縮機',x1:620,y1:PHY.T,x2:780,y2:PHY.R,wa:'3',w:'6'});
+wire('WU:a','M1','壓縮機',{breakable:false,hidden:true}); wire('WU:b','M4','壓縮機',{breakable:false,hidden:true});
+wire('WV:a','M2','壓縮機',{breakable:false,hidden:true}); wire('WV:b','M5','壓縮機',{breakable:false,hidden:true});
+wire('WW:a','M3','壓縮機',{breakable:false,hidden:true}); wire('WW:b','M6','壓縮機',{breakable:false,hidden:true});
+// MCD (42D)：R→6、S→4、T→5
+const mcdY={R:350,S:400,T:450};
+for(const p of ['R','S','T']){
+  const z=MZ[p], y=mcdY[p];
+  addEl({id:'MCD'+p,sheet:M,kind:'contact',ct:'NO',owner:'42D',label:p==='R'?'MCD (42D)':'',name:`MCD 主接點 ${p} 相 → 端子 ${termR[p]}`,zone:z,x1:430,y1:y,x2:470,y2:y,wa:p+'1',w:termR[p]});
+  wire('tap'+p,'MCD'+p+':a',z);
+  wire('MCD'+p+':b','J'+termR[p]+'m',z,{pts:[[{R:840,S:860,T:820}[p],y]]});
+}
+// 修正：S、T 的 MCD 接入點 x 位置不同，讓線不重疊
+NODES.J4m.x=860; NODES.J5m.x=820;
+// 47R 限電壓控制器：三條引線接到 R1、S1、T1，內部以電阻表示
+node('47RR',t47X.R,40,M,'R1','47R R 端子'); node('47RS',t47X.S,40,M,'S1','47R S 端子'); node('47RT',t47X.T,40,M,'T1','47R T 端子');
+wire('t47R','47RR','47R',{breakable:false}); wire('t47S','47RS','47R',{breakable:false}); wire('t47T','47RT','47R',{breakable:false});
+addEl({id:'47Ri1',sheet:M,kind:'int',R:22000,label:'47R',name:'47R 內部',zone:'47R',x1:t47X.R,y1:40,x2:t47X.S,y2:40,wa:'R1',w:'S1'});
+addEl({id:'47Ri2',sheet:M,kind:'int',R:22000,label:'47R',name:'47R 內部',zone:'47R',x1:t47X.S,y1:40,x2:t47X.T,y2:40,wa:'S1',w:'T1'});
+wire('47Ri1:a','47RR','47R',{breakable:false,hidden:true}); wire('47Ri1:b','47RS','47R',{breakable:false,hidden:true});
+wire('47Ri2:a','47RS','47R',{breakable:false,hidden:true}); wire('47Ri2:b','47RT','47R',{breakable:false,hidden:true});
+
 const NODE_IDS=Object.keys(NODES); const NI={}; NODE_IDS.forEach((id,i)=>NI[id]=i); const NN=NODE_IDS.length;
-const RELAYS=['X','MCP','MCT','MCF','MCM','MCS','MCD','TR'];
+const RELAYS=['X1','X2','X3','X4','52C','6S','42D'];
+/* 【延時設定】延時電驛。type：on＝通電延時、off＝斷電延時、cyc＝雙延時（ON/OFF 循環）
+   d 是練習用的縮短時間（秒），label 是檢定圖上的設定值。 */
+const TIMERS={
+  '2S': {type:'on', d:4,  label:'3～5 s'},
+  '2G1':{type:'on', d:12, label:'6 min'},
+  '2G2':{type:'cyc',on:5,off:10,label:'ON 5 s／OFF 10 s'},
+  '2G3':{type:'off',d:6,  label:'OFF 60 s'},
+  '2G4':{type:'on', d:6,  label:'60 s'},
+  '2G5':{type:'off',d:6,  label:'OFF 60 s'},
+  '2G6':{type:'on', d:3,  label:'30 s'}
+};
+const COILS=Object.keys(TIMERS).concat(RELAYS);
 const LOADS=ELIST.filter(e=>e.R);
 
 /* ========== 狀態 ==========
    S＝電路與現場的即時狀態（有沒有送電、水溫、壓力…）
    E＝這一題的資料（故障清單、分數、用時、紀錄）
-   M＝操作狀態（目前模式、電表檔位、探棒位置） */
-const S={}; const E={}; const M={tool:'measure',meter:'ACV',next:'r',probe:{r:null,b:null},live:false,speed:1,penalized:false};
+   M＝操作狀態（目前圖、模式、電表檔位、探棒位置） */
+const S={}; const E={}; const MS={tool:'measure',sheet:'ctrl',meter:'ACV',next:'r',probe:{r:null,b:null},live:false,speed:1,penalized:false,guide:true};
 function resetSim(){
-  Object.assign(S,{power:false,pressed:{ON:false,OFF:false},latch:{ON:false,OFF:false},manual:{},en:{},loadOn:{},V:null,nets:null,
-    trTime:0,trDone:false,flow1:0,flow2:0,Tch:12.5,Tret:13,Tcw:28,HP:7.5,LP:7,hpTrip:false,lpOpen:false,tcClosed:true,thcTrip:false,
-    yTime:0,comp:'stop',compA:0,inrush:0});
+  const tm={}; for(const k in TIMERS) tm[k]={t:0,out:false};
+  Object.assign(S,{nfb1:false,nfb2:false,estop:false,sw:'stop',remote:false,pump1:false,pump2:false,
+    pressed:{ON:false,OFF:false},latch:{ON:false,OFF:false},manual:{},en:{},loadOn:{},V:null,nets:null,tm,
+    flow1:0,flow2:0,Tch:12.5,Tret:13,Tcw:28,Td:40,HP:7.5,LP:7,hpTrip:false,lpOpen:false,cool:true,frz:false,
+    td95:false,t49:false,ol51:false,r47ok:false,humT:0,yTime:0,comp:'stop',compA:0});
 }
 
 /* ========== 接點邏輯 ==========
-   act() 回答「這個接點的主人現在有沒有動作」，例如 X 電驛吸合了沒、HP 跳脫了沒。
+   act() 回答「這個接點的主人現在有沒有動作」。
    isClosed() 再依接點型式換算：a 接點＝動作時閉合；b 接點＝動作時打開。
    元件被設成故障（fault）時一律當作開路。 */
 function act(owner,en){
+  if(RELAYS.includes(owner)) return !!en[owner];
+  if(TIMERS[owner]) return (S.nfb2||!S.manual[owner]) ? S.tm[owner].out : true;
   switch(owner){
-    case 'X':case 'MCP':case 'MCT':case 'MCF':case 'MCM':case 'MCS':case 'MCD': return !!en[owner];
-    case 'TR': return S.power ? S.trDone : !!en.TR;
-    case 'THC': return S.thcTrip;
-    case 'PBON': return S.pressed.ON || S.latch.ON;
-    case 'PBOFF': return S.pressed.OFF || S.latch.OFF;
+    case 'NFB1': return S.nfb1;
+    case 'NFB2': return S.nfb2;
+    case 'ESTOP': return S.estop;
+    case 'PBON': return S.pressed.ON||S.latch.ON;
+    case 'PBOFF': return S.pressed.OFF||S.latch.OFF;
+    case 'SWN': return S.sw==='near';
+    case 'SWR': return S.sw==='remote';
+    case 'REM': return S.remote;
     case 'FS1': return S.flow1>0.8;
     case 'FS2': return S.flow2>0.8;
-    case 'HP': return S.hpTrip;
-    case 'LP': return !S.lpOpen;
-    case 'TC': return S.tcClosed;
+    case 'EW': return S.flow1>0.8;
+    case 'LO': return true;            // 油位正常
+    case '26W': return S.frz;
+    case '47R': return !S.r47ok;
+    case '51C': return S.ol51;
+    case '63HR': return S.hpTrip;
+    case '63LP': return !S.lpOpen;
+    case '23C3': return S.td95;
+    case '23C4': return false;
+    case '49C': return S.t49;
+    case 'OUT1': return S.cool;
+    case 'OUT2': return !S.cool;
   }
-  return false; // 3E, THP, THT, THF 正常未跳脫
+  return false;
 }
 function isClosed(e,en){
   if(e.fault) return false;
   if(e.kind==='fuse') return true;
   const a=act(e.owner,en);
-  return (e.ct==='NO'||e.ct==='TDC') ? a : !a;
+  return e.ct==='NC' ? !a : a;
 }
 
 /* ========== 電路求解（進階，可以先跳過） ==========
    1. computeNets()：把「導線＋閉合的接點」連在一起的點視為同一個節點（同電位）。
-   2. solveNodal()：用電路學的「節點電壓法」解聯立方程式，求每個節點幾伏特。
-      線圈、燈泡、電熱器當作電阻處理。
-   3. solveV() 求送電時的電壓（L＝220 V、N＝0 V）。
-   4. measureR() 模擬電阻檔：在兩點間送入 1 A，量到的電壓就等於電阻值。
-   這就是為什麼「量開路接點兩端會讀到 220 V」等現象會自然出現。 */
+   2. solveNodal()：用電路學的「節點電壓法」解聯立方程式。線圈、燈泡、電熱器當作電阻。
+   3. 電源是三相 220 V，用「相量」（複數）表示 R、S、T 三相，量到的是兩點相量差的大小。
+   4. measureR() 模擬電阻檔：在兩點間送入 1 A，量到的電壓就等於電阻值。 */
+const VPH=220/Math.sqrt(3);
+const PH={R:[0,VPH],S:[VPH*Math.cos(-Math.PI/6),VPH*Math.sin(-Math.PI/6)],T:[VPH*Math.cos(7*Math.PI/6),VPH*Math.sin(7*Math.PI/6)]};
 function computeNets(en){
   const p=new Int32Array(NN); for(let i=0;i<NN;i++) p[i]=i;
   const f=i=>{ while(p[i]!==i){ p[i]=p[p[i]]; i=p[i]; } return i; };
@@ -733,112 +991,148 @@ function computeNets(en){
   const root=new Int32Array(NN); for(let i=0;i<NN;i++) root[i]=f(i);
   return {root,res};
 }
-function gauss(A,b){
-  const n=b.length;
+function gauss(A,rhs){ // rhs：一個或多個右側向量
+  const n=A.length;
   for(let c=0;c<n;c++){
     let p=c,m=Math.abs(A[c][c]);
     for(let r=c+1;r<n;r++){ const v=Math.abs(A[r][c]); if(v>m){m=v;p=r;} }
     if(m<1e-300) continue;
-    if(p!==c){ const t=A[c];A[c]=A[p];A[p]=t; const tb=b[c];b[c]=b[p];b[p]=tb; }
+    if(p!==c){ [A[c],A[p]]=[A[p],A[c]]; for(const b of rhs){ const t=b[c];b[c]=b[p];b[p]=t; } }
     const Ac=A[c], piv=Ac[c];
-    for(let r=c+1;r<n;r++){ const Ar=A[r]; const fct=Ar[c]/piv; if(fct===0) continue; for(let k=c;k<n;k++) Ar[k]-=fct*Ac[k]; b[r]-=fct*b[c]; }
+    for(let r=c+1;r<n;r++){ const Ar=A[r]; const fct=Ar[c]/piv; if(fct===0) continue; for(let k=c;k<n;k++) Ar[k]-=fct*Ac[k]; for(const b of rhs) b[r]-=fct*b[c]; }
   }
-  const x=new Float64Array(n);
-  for(let r=n-1;r>=0;r--){ let s=b[r]; for(let k=r+1;k<n;k++) s-=A[r][k]*x[k]; x[r]=A[r][r]?s/A[r][r]:0; }
-  return x;
+  return rhs.map(b=>{ const x=new Float64Array(n);
+    for(let r=n-1;r>=0;r--){ let s=b[r]; for(let k=r+1;k<n;k++) s-=A[r][k]*x[k]; x[r]=A[r][r]?s/A[r][r]:0; } return x; });
 }
-function solveNodal(nets,fixed,inject,leak){
+function solveNodal(nets,fixed,inject,leak,leakV){
   const {root,res}=nets; const unk=new Map(); let n=0;
   for(let i=0;i<NN;i++){ const r=root[i]; if(!fixed.has(r)&&!unk.has(r)) unk.set(r,n++); }
-  const A=Array.from({length:n},()=>new Float64Array(n)); const b=new Float64Array(n);
-  const half=(x,y,g)=>{ if(!unk.has(x)) return; const i=unk.get(x); A[i][i]+=g; if(unk.has(y)) A[i][unk.get(y)]-=g; else b[i]+=g*fixed.get(y); };
+  const A=Array.from({length:n},()=>new Float64Array(n)); const br=new Float64Array(n), bi=new Float64Array(n);
+  const half=(x,y,g)=>{ if(!unk.has(x)) return; const i=unk.get(x); A[i][i]+=g;
+    if(unk.has(y)) A[i][unk.get(y)]-=g; else { const v=fixed.get(y); br[i]+=g*v[0]; bi[i]+=g*v[1]; } };
   for(const [a,bb,R] of res){ const ra=root[a], rb=root[bb]; if(ra===rb) continue; const g=1/R; half(ra,rb,g); half(rb,ra,g); }
-  for(let i=0;i<n;i++) A[i][i]+=leak;
-  if(inject) for(const [r,I] of inject) if(unk.has(r)) b[unk.get(r)]+=I;
-  const x=gauss(A,b);
-  return r => fixed.has(r) ? fixed.get(r) : x[unk.get(r)];
+  for(let i=0;i<n;i++){ A[i][i]+=leak; br[i]+=leak*leakV[0]; bi[i]+=leak*leakV[1]; }
+  if(inject) for(const [r,I] of inject) if(unk.has(r)) br[unk.get(r)]+=I;
+  const [xr,xi]=gauss(A,[br,bi]);
+  return r => fixed.has(r) ? fixed.get(r) : [xr[unk.get(r)],xi[unk.get(r)]];
 }
 function solveV(nets){
-  const {root}=nets; const rL=root[NI.SRC_L], rN=root[NI.SRC_N];
-  const fixed=new Map([[rN,0],[rL,220]]);
-  const vr=solveNodal(nets,fixed,null,1e-9);
-  const V=new Float64Array(NN); for(let i=0;i<NN;i++) V[i]=vr(root[i]);
-  return V;
+  const {root}=nets;
+  const fixed=new Map([[root[NI.mR],PH.R],[root[NI.mS],PH.S],[root[NI.mT],PH.T]]);
+  const vr=solveNodal(nets,fixed,null,1e-9,PH.T);
+  const Vr=new Float64Array(NN), Vi=new Float64Array(NN);
+  for(let i=0;i<NN;i++){ const v=vr(root[i]); Vr[i]=v[0]; Vi[i]=v[1]; }
+  return {Vr,Vi};
 }
+function vdiff(V,a,b){ return Math.hypot(V.Vr[a]-V.Vr[b],V.Vi[a]-V.Vi[b]); }
 function measureR(nets,a,b){
   const {root}=nets; const ra=root[NI[a]], rb=root[NI[b]];
   if(ra===rb) return 0;
-  const vr=solveNodal(nets,new Map([[rb,0]]),[[ra,1]],1e-12);
-  return vr(ra);
+  const vr=solveNodal(nets,new Map([[rb,[0,0]]]),[[ra,1]],1e-12,[0,0]);
+  return vr(ra)[0];
+}
+function phaseOf(id){
+  const r=S.nets.root[NI[id]], rt=S.nets.root;
+  if(r===rt[NI.mR]) return 'R'; if(r===rt[NI.mS]) return 'S'; if(r===rt[NI.mT]) return 'T'; return null;
 }
 
 /* ========== 每拍運算 ==========
-   stepLogic()：反覆計算「接點狀態 → 電壓 → 線圈吸合 → 接點狀態…」直到穩定，
-               就像真的電路送電後一瞬間穩定下來。
-   stepPhysics()：【物理模擬】水流、溫度、壓力的變化，以及跳脫條件。
-               想調整設定值就改這裡的數字（下面有標註）。 */
+   stepLogic()：反覆計算「接點狀態 → 電壓 → 線圈吸合 → 接點狀態…」直到穩定。
+   斷電時改用「手動壓下」的狀態，方便用電阻檔量接點。 */
 function stepLogic(){
-  if(!S.power){
-    const en=Object.assign({},S.manual);
-    S.en=en; S.nets=computeNets(en); S.V=null; S.loadOn={}; return;
-  }
-  let en=S.en, nets, V;
-  for(let it=0;it<12;it++){
+  let en=S.nfb2 ? S.en : Object.assign({},S.manual);
+  let nets, V;
+  for(let it=0;it<14;it++){
     nets=computeNets(en); V=solveV(nets);
     const ne={};
-    for(const e of LOADS) if(e.relay && !e.fault && Math.abs(V[NI[e.id+':a']]-V[NI[e.id+':b']])>150) ne[e.relay]=true;
-    const same=RELAYS.every(r=>!!ne[r]===!!en[r]);
+    for(const e of LOADS) if(e.relay && !e.fault && vdiff(V,NI[e.id+':a'],NI[e.id+':b'])>150) ne[e.relay]=true;
+    if(!S.nfb2) for(const k in S.manual) if(S.manual[k]) ne[k]=true;
+    const same=COILS.every(r=>!!ne[r]===!!en[r]);
     en=ne; if(same) break;
   }
   S.en=en; S.nets=nets; S.V=V;
-  const lo={}; for(const e of LOADS) lo[e.id]=!e.fault && Math.abs(V[NI[e.id+':a']]-V[NI[e.id+':b']])>150;
+  const lo={}; for(const e of LOADS) lo[e.id]=!e.fault && vdiff(V,NI[e.id+':a'],NI[e.id+':b'])>150;
   S.loadOn=lo;
+  // 47R：NFB1 二次側 R1、S1、T1 三相都在才算正常
+  const pr=phaseOf('t47R'), ps=phaseOf('t47S'), pt=phaseOf('t47T');
+  S.r47ok = pr==='R' && ps==='S' && pt==='T';
 }
+/* 壓縮機繞組檢查：Y 接線要三相俱全且 4、5、6 短接；Δ 接線要每個繞組兩端都接到不同相。 */
+function motorMode(){
+  const en=S.en;
+  if(!en['52C'] && !en['42D']) return 'stop';
+  if(en['6S']&&en['42D']) return 'hum';
+  const p1=phaseOf('M1'),p2=phaseOf('M2'),p3=phaseOf('M3');
+  const three=p1&&p2&&p3&&new Set([p1,p2,p3]).size===3;
+  if(en['52C']&&en['6S']){
+    const r=S.nets.root;
+    const star=r[NI.M4]===r[NI.M5]&&r[NI.M5]===r[NI.M6]&&!phaseOf('M4');
+    if(three&&star) return 'Y';
+    return (p1||p2||p3)?'hum':'stop';
+  }
+  if(en['52C']&&en['42D']){
+    const ok=[['M1','M4'],['M2','M5'],['M3','M6']].every(([a,b])=>{ const x=phaseOf(a),y=phaseOf(b); return x&&y&&x!==y; });
+    if(three&&ok) return 'D';
+    return (p1||p2||p3)?'hum':'stop';
+  }
+  return 'stop';
+}
+/* 【物理模擬】延時電驛、水流、溫度、壓力的變化，以及跳脫條件。想調整設定值就改這裡的數字。 */
 function stepPhysics(dt){
-  const en=S.en, P=S.power;
-  const p1=!!(P&&en.MCP), p2=!!(P&&en.MCT), fan=!!(P&&en.MCF);
-  S.p1=p1; S.p2=p2; S.fan=fan;
-  // 水流：泵運轉約 1.5 秒建立水流（flow 到 0.8 以上時流量開關閉合）
-  S.flow1=clamp(S.flow1+(p1?dt/1.5:-dt/0.8),0,1);
-  S.flow2=clamp(S.flow2+(p2?dt/1.5:-dt/0.8),0,1);
-  const sv=!!(P&&S.loadOn.SVc); S.sv=sv;
-  let mode='stop';
-  if(P&&en.MCM){ if(en.MCS&&!en.MCD) mode='Y'; else if(en.MCD&&!en.MCS) mode='D'; }
+  const en=S.en;
+  // 延時電驛計時
+  for(const k in TIMERS){
+    const T=TIMERS[k], st=S.tm[k], on=!!(S.nfb2&&en[k]);
+    if(T.type==='on'){ if(on){ st.t+=dt; st.out=st.t>=T.d; } else { st.t=0; st.out=false; } }
+    else if(T.type==='off'){ if(on){ st.out=true; st.t=0; } else if(st.out){ st.t+=dt; if(st.t>=T.d) st.out=false; } }
+    else { if(on){ st.t+=dt; st.out=(st.t%(T.on+T.off))<T.on; } else { st.t=0; st.out=false; } }
+  }
+  // 水流：泵運轉約 1.5 秒建立水流（flow 到 0.8 以上時流量開關、水壓差開關閉合）
+  S.flow1=clamp(S.flow1+(S.pump1?dt/1.5:-dt/0.8),0,1);
+  S.flow2=clamp(S.flow2+(S.pump2?dt/1.5:-dt/0.8),0,1);
+  const mode=motorMode();
   if(mode!==S.comp){
-    if(mode==='Y') ev('壓縮機以 Y 接線啟動');
-    else if(mode==='D'&&S.comp==='Y') ev('TR 計時到，切換為 Δ 運轉');
-    else if(mode==='D'){ S.inrush=1.5; ev('壓縮機未經 Y 啟動，直接 Δ 全壓啟動，啟動電流過大','warn'); }
-    else if(mode==='stop'){ ev(P&&en.MCM?'MCM 吸合但 Y、Δ 接觸器都沒吸合，壓縮機無法運轉':'壓縮機停止', P&&en.MCM?'warn':'info'); }
+    if(mode==='Y') ev('壓縮機以 Y 接線起動');
+    else if(mode==='D'&&S.comp==='Y') ev('2S 計時到，切換為 Δ 運轉');
+    else if(mode==='D') ev('壓縮機未經 Y 起動直接 Δ 全壓起動','warn');
+    else if(mode==='hum') ev('壓縮機發出嗡嗡聲、不轉（缺相或接線不完整）','bad');
+    else if(mode==='stop') ev(S.en['52C']?'52C 吸合但壓縮機沒有運轉':'壓縮機停止', S.en['52C']?'warn':'info');
     S.comp=mode;
   }
-  // TR 限時電驛：通電 4 秒後動作（改 4 就能調整 Y-Δ 切換時間）
-  if(P&&en.TR){ S.trTime+=dt; if(S.trTime>=4) S.trDone=true; } else { S.trTime=0; S.trDone=false; }
-  const run=mode!=='stop';
-  // 壓縮機卡在 Y 接線超過 25 秒 → THC 過載跳脫
-  if(mode==='Y'){ S.yTime+=dt; if(S.yTime>25&&!S.thcTrip){ S.thcTrip=true; ev('壓縮機長時間以 Y 接線運轉，THC 過載跳脫','bad'); } } else S.yTime=0;
-  // 冰水溫度：負載讓水溫慢慢往 16 °C 上升，壓縮機運轉時往下降（Δ 降得比 Y 快）
+  const run=mode==='Y'||mode==='D';
+  // 缺相（嗡嗡聲）5 秒或長時間 Y 運轉 25 秒 → 51C 過載跳脫
+  if(mode==='hum'){ S.humT+=dt; if(S.humT>5&&!S.ol51){ S.ol51=true; ev('電流過大，51C 過載電驛跳脫（需手動復歸）','bad'); } } else S.humT=0;
+  if(mode==='Y'){ S.yTime+=dt; if(S.yTime>25&&!S.ol51){ S.ol51=true; ev('長時間以 Y 接線運轉，51C 過載跳脫','bad'); } } else S.yTime=0;
+  // 冰水溫度：負載讓水溫往 16 °C 上升，壓縮機運轉且有冰水流量時下降
   S.Tch+=(16-S.Tch)*0.012*dt;
-  if(run&&S.flow1>0.8) S.Tch-=(mode==='D'?0.30:0.14)*(sv?1:0.08)*dt;
-  S.Tch=clamp(S.Tch,4.5,16);
-  const tretT=S.Tch+(run&&S.flow1>0.8?4.5:0.6); S.Tret+=(tretT-S.Tret)*Math.min(1,0.3*dt);
-  // TC 溫度開關：10 °C 以上閉合、7 °C 以下開路
-  if(!S.tcClosed&&S.Tch>=10){ S.tcClosed=true; ev('冰水溫度回升至 10 °C，TC 閉合'); }
-  if(S.tcClosed&&S.Tch<=7){ S.tcClosed=false; ev('冰水溫度降至 7 °C，TC 開路（正常溫控停機）'); }
-  // 高壓：正常約 12.5；沒冷卻水 +9、水塔風扇沒轉 +9。達 20 kg/cm² 時 HP 跳脫
-  const cond=(S.flow2>0.8?0:9)+(fan?0:9);
-  const hpT=run?(12.5+cond-(mode==='Y'?1:0)):7.5;
+  if(run&&S.flow1>0.8) S.Tch-=(mode==='D'?0.30:0.14)*dt;
+  S.Tch=clamp(S.Tch,2,16);
+  S.Tret+=(S.Tch+(run&&S.flow1>0.8?4.5:0.6)-S.Tret)*Math.min(1,0.3*dt);
+  // 23C1 溫度控制：≥ 10 °C OUT1（需冷）、≤ 7 °C OUT2（停機）
+  if(!S.cool&&S.Tch>=10){ S.cool=true; ev('冰水回升至 10 °C，23C1 切到 OUT1（需冷卻）'); }
+  if(S.cool&&S.Tch<=7){ S.cool=false; ev('冰水降至 7 °C，23C1 切到 OUT2，溫度到達停機'); }
+  // 26W 防凍：≤ 3 °C 動作、≥ 5 °C 復歸
+  if(!S.frz&&S.Tch<=3){ S.frz=true; ev('冰水溫度過低，26W 防凍開關動作','bad'); }
+  if(S.frz&&S.Tch>=5) S.frz=false;
+  // 吐出溫度：運轉時上升，SV2 旁通時下降。23C3：≥95 閉合、≤85 開路。49C：≥115 動作、≤85 復歸
+  const sv2=!!S.loadOn.SV2;
+  const tdT = run ? (sv2?60:(mode==='D'?120:105)) : 40;
+  S.Td+=(tdT-S.Td)*Math.min(1,(run?0.08:0.03)*dt);
+  if(!S.td95&&S.Td>=95) S.td95=true; if(S.td95&&S.Td<=85) S.td95=false;
+  if(!S.t49&&S.Td>=115){ S.t49=true; ev('吐出溫度過高，49C 內載式過電流器動作，壓縮機停機','bad'); }
+  if(S.t49&&S.Td<=85){ S.t49=false; ev('吐出溫度下降，49C 自動復歸'); }
+  // 高壓：正常約 13；沒有冷卻水 +9。≥ 20 kg/cm² 時 63HR 跳脫
+  const hpT=run?(13+(S.flow2>0.8?0:9)-(mode==='Y'?1:0)):7.5;
   S.HP+=(hpT-S.HP)*Math.min(1,(run?0.18:0.06)*dt);
-  if(!S.hpTrip&&S.HP>=20){ S.hpTrip=true; ev('排氣壓力過高，HP 高壓開關跳脫（需手動復歸）','bad'); }
-  // 低壓：正常約 3.6～4.5；SV 沒打開時降到 0.4。≤1.5 LP 開路、≥3.0 自動復歸
-  const lpT=run?(sv?3.6+(S.Tch-7)*0.12:0.4):7;
+  if(!S.hpTrip&&S.HP>=20){ S.hpTrip=true; ev('排氣壓力過高，63HR 跳脫（需手動復歸）','bad'); }
+  // 低壓：運轉時約 3.6～4.5；沒有冰水流量時下降。≤ 1.5 開路、≥ 3.0 自動復歸
+  const lpT=run?(S.flow1>0.8?3.6+(S.Tch-7)*0.12:1.0):7;
   S.LP+=(lpT-S.LP)*Math.min(1,(run?0.35:0.08)*dt);
-  if(!S.lpOpen&&S.LP<=1.5){ S.lpOpen=true; ev('吸氣壓力過低，LP 低壓開關開路','bad'); }
-  if(S.lpOpen&&S.LP>=3){ S.lpOpen=false; ev('吸氣壓力回升，LP 自動復歸'); }
-  const tcwT=run?31.5+(fan?0:6):28; S.Tcw+=(tcwT-S.Tcw)*Math.min(1,0.05*dt);
-  if(S.inrush>0) S.inrush-=dt;
-  S.compA=!run?0:((S.inrush>0?92:mode==='Y'?17.5:29)+(Math.random()-0.5)*0.6);
+  if(!S.lpOpen&&S.LP<=1.5){ S.lpOpen=true; ev('吸氣壓力過低，63LP 開路','bad'); }
+  if(S.lpOpen&&S.LP>=3){ S.lpOpen=false; ev('吸氣壓力回升，63LP 自動復歸'); }
+  S.Tcw+=((run?31.5:28)-S.Tcw)*Math.min(1,0.05*dt);
+  S.compA=mode==='hum'?78:!run?0:((mode==='Y'?17.5:29)+(Math.random()-0.5)*0.6);
 }
-
 function ev(msg,kind='info'){
   E.events.unshift({t:fmtT(E.elapsed),msg,kind});
   if(E.events.length>7) E.events.length=7;
@@ -846,9 +1140,8 @@ function ev(msg,kind='info'){
 }
 
 /* ========== 電路圖繪製 ==========
-   buildSVG() 依照【電路定義】產生電路圖；sym() 負責畫每種元件的符號
-   （例如 contact 畫成 ─┤├─，NC 再加一條斜線）。 */
-const svg=$('#dia');
+   buildSheet() 依照電路定義產生電路圖；sym() 負責畫每種元件的符號。 */
+const svgs={ctrl:$('#diaC'),main:$('#diaM')};
 const wEls={}, eEls={};
 function wirePts(w){
   const a=NODES[w.a], b=NODES[w.b];
@@ -857,186 +1150,190 @@ function wirePts(w){
   pts.push([b.x,b.y]); return pts;
 }
 function wireMid(w){
-  const p=wirePts(w); let best=0,bi=0;
-  for(let i=0;i<p.length-1;i++){ const d=Math.hypot(p[i+1][0]-p[i][0],p[i+1][1]-p[i][1]); if(d>best){best=d;bi=i;} }
-  return [(p[bi][0]+p[bi+1][0])/2,(p[bi][1]+p[bi+1][1])/2];
+  const p=wirePts(w); let best=-1,bi=0;
+  for(let i=0;i<p.length-1;i++){ const dd=Math.hypot(p[i+1][0]-p[i][0],p[i+1][1]-p[i][1]); if(dd>best){best=dd;bi=i;} }
+  return {x:(p[bi][0]+p[bi+1][0])/2,y:(p[bi][1]+p[bi+1][1])/2,len:best,horiz:p[bi][1]===p[bi+1][1]};
 }
 function sym(e){
-  const L=e.len, c=L/2; let s='';
+  const Ln=e.len, c=Ln/2; let s='';
   const lead=(x1,x2)=>`<line class="s" x1="${x1}" y1="0" x2="${x2}" y2="0"/>`;
   switch(e.kind){
     case 'contact':
-      s+=lead(0,15)+lead(25,L)+`<line class="s" x1="15" y1="-10" x2="15" y2="10"/><line class="s" x1="25" y1="-10" x2="25" y2="10"/>`;
-      if(e.ct==='NC'||e.ct==='TDO') s+=`<line class="s" x1="9" y1="11" x2="31" y2="-11"/>`;
-      if(e.ct==='TDO'||e.ct==='TDC') s+=`<path class="s" d="M11 -15 Q20 -23 29 -15"/>`;
+      s+=lead(0,15)+lead(25,Ln)+`<line class="s" x1="15" y1="-10" x2="15" y2="10"/><line class="s" x1="25" y1="-10" x2="25" y2="10"/>`;
+      if(e.ct==='NC') s+=`<line class="s" x1="9" y1="11" x2="31" y2="-11"/>`;
+      if(e.timer) s+=`<path class="s" d="M11 -15 Q20 -23 29 -15"/>`;
       s+=`<line class="cbar" x1="15" y1="0" x2="25" y2="0"/>`;
       if(e.tag) s+=`<circle class="tagc" cx="${c}" cy="19" r="6.5"/><text class="tagt" x="${c}" y="22.5">${e.tag}</text>`;
       break;
+    case 'brk':
+      s+=lead(0,12)+lead(28,Ln)+`<circle class="body" cx="12" cy="0" r="2.6"/><circle class="body" cx="28" cy="0" r="2.6"/><line class="s" x1="12" y1="0" x2="29" y2="-9"/><line class="cbar" x1="12" y1="0" x2="28" y2="0"/>`;
+      break;
     case 'pb':
-      s+=lead(0,12)+lead(28,L)+`<circle class="body" cx="12" cy="0" r="2.4"/><circle class="body" cx="28" cy="0" r="2.4"/>`;
+      s+=lead(0,12)+lead(28,Ln)+`<circle class="body" cx="12" cy="0" r="2.4"/><circle class="body" cx="28" cy="0" r="2.4"/>`;
       if(e.ct==='NO') s+=`<line class="s" x1="8" y1="-8" x2="32" y2="-8"/><line class="s" x1="20" y1="-8" x2="20" y2="-17"/><line class="s" x1="14" y1="-17" x2="26" y2="-17"/>`;
       else s+=`<line class="s" x1="8" y1="3" x2="32" y2="3"/><line class="s" x1="20" y1="3" x2="20" y2="-15"/><line class="s" x1="14" y1="-15" x2="26" y2="-15"/>`;
       s+=`<line class="cbar" x1="12" y1="0" x2="28" y2="0"/>`;
       break;
-    case 'coil':
-      s+=lead(0,c-14)+lead(c+14,L)+`<circle class="body" cx="${c}" cy="0" r="14"/>`; break;
-    case 'sol':
-      s+=lead(0,c-14)+lead(c+14,L)+`<rect class="body" x="${c-14}" y="-10" width="28" height="20"/>`; break;
-    case 'lamp':
-      s+=lead(0,c-12)+lead(c+12,L)+`<circle class="body" cx="${c}" cy="0" r="12"/><line class="s" x1="${c-8.5}" y1="-8.5" x2="${c+8.5}" y2="8.5"/><line class="s" x1="${c-8.5}" y1="8.5" x2="${c+8.5}" y2="-8.5"/>`; break;
-    case 'heater':
-      s+=lead(0,8)+lead(42,L)+`<path class="body" style="fill:none" d="M8 0 L11 -8 L17 8 L23 -8 L29 8 L35 -8 L39 8 L42 0"/>`; break;
-    case 'fuse':
-      s+=lead(0,L)+`<rect class="body" x="8" y="-6" width="24" height="12" style="fill:none"/>`; break;
+    case 'coil': s+=lead(0,c-14)+lead(c+14,Ln)+`<circle class="body" cx="${c}" cy="0" r="14"/>`; break;
+    case 'sol': s+=lead(0,c-14)+lead(c+14,Ln)+`<rect class="body" x="${c-14}" y="-10" width="28" height="20"/>`; break;
+    case 'lamp': s+=lead(0,c-12)+lead(c+12,Ln)+`<circle class="body" cx="${c}" cy="0" r="12"/><line class="s" x1="${c-8.5}" y1="-8.5" x2="${c+8.5}" y2="8.5"/><line class="s" x1="${c-8.5}" y1="8.5" x2="${c+8.5}" y2="-8.5"/>`; break;
+    case 'heater': s+=lead(0,8)+lead(42,Ln)+`<path class="body" style="fill:none" d="M8 0 L11 -8 L17 8 L23 -8 L29 8 L35 -8 L39 8 L42 0"/>`; break;
+    case 'fuse': s+=lead(0,Ln)+`<rect class="body" x="8" y="-6" width="24" height="12" style="fill:none"/>`; break;
   }
   return s;
 }
-function buildSVG(){
-  let h=`<defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern></defs>`;
-  h+=`<rect width="1200" height="900" fill="url(#grid)"/>`;
-  h+=`<text class="ttl" x="${XL+16}" y="38">R</text><text class="ttl" x="${XN-22}" y="38">S</text>`;
-  h+=`<text class="ttl" x="560" y="38" text-anchor="middle">控制電源 AC 220 V（經 NFB）</text>`;
-  h+=`<line x1="${XL+34}" y1="34" x2="470" y2="34" stroke="var(--line)" stroke-dasharray="4 4"/><line x1="650" y1="34" x2="${XN-34}" y2="34" stroke="var(--line)" stroke-dasharray="4 4"/>`;
-  LINES.forEach((y,i)=>{ h+=`<text class="lnum" x="24" y="${y+4}">${i+1}</text>`; });
-  const desc=[[120,'X 啟動自保持'],[215,'GL 停止'],[265,'P1 冰水泵'],[310,'RL1'],[360,'P2 冷卻水泵'],[405,'RL2'],[455,'水塔風扇'],[500,'RL3'],
-    [550,'壓縮機 MCM'],[595,'SV 液管閥'],[640,'RL4 運轉'],[685,'TR 計時'],[730,'MCS（Y）'],[775,'MCD（Δ）'],[825,'CH 加熱器'],[870,'YL 過載']];
-  for(const [y,t] of desc) h+=`<text class="rdesc" x="${XN+16}" y="${y+4}">${t}</text>`;
-  // wires
-  for(const w of WIRES){
-    const d='M'+wirePts(w).map(p=>p.join(' ')).join(' L');
-    h+=`<path class="whit" data-wire="${w.id}" d="${d}"/><path class="w" id="w-${w.id}" d="${d}"/>`;
+function buildSheet(sheet){
+  const svg=svgs[sheet]; const vb=svg.viewBox.baseVal;
+  let h=`<defs><pattern id="grid-${sheet}" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern></defs>`;
+  h+=`<rect width="${vb.width}" height="${vb.height}" fill="url(#grid-${sheet})"/>`;
+  if(sheet==='ctrl'){
+    h+=`<text class="ttl" x="${XL+12}" y="26">R</text><text class="ttl" x="${XN+12}" y="26">T</text>`;
+    h+=`<text class="ttl" x="620" y="30" text-anchor="middle">控制電源 AC 220 V（NFB2）</text>`;
+    h+=`<line x1="${XL+20}" y1="64" x2="${XN-20}" y2="64" stroke="var(--line)" stroke-dasharray="6 5"/>`;
+    for(const [y,t] of DESC) h+=`<text class="rdesc" x="${XN+14}" y="${y+4}">${t}</text>`;
+  } else {
+    h+=`<text class="ttl" x="20" y="${PHY.R+5}">R</text><text class="ttl" x="20" y="${PHY.S+5}">S</text><text class="ttl" x="20" y="${PHY.T+5}">T</text>`;
+    h+=`<text class="ttl" x="40" y="24">主電源 3φ 220 V（NFB1）</text>`;
+    h+=`<circle class="devbox" cx="700" cy="170" r="66"/><text class="lbl big" x="700" y="166">COMP</text><text class="rdesc" x="700" y="186" text-anchor="middle">壓縮機</text>`;
+    h+=`<text class="rdesc" x="700" y="206" text-anchor="middle">繞組 1-4／2-5／3-6</text>`;
+    h+=`<rect class="devbox" x="275" y="8" width="70" height="26" rx="5"/><text class="lbl" x="310" y="26">47R</text>`;
+    h+=`<text class="rdesc" x="990" y="${PHY.T+40}" text-anchor="middle">Y 短接</text>`;
   }
-  // elements
+  for(const w of WIRES){
+    if(w.hidden||NODES[w.a].sheet!==sheet) continue;
+    const dd='M'+wirePts(w).map(p=>p.join(' ')).join(' L');
+    h+=`<path class="whit" data-wire="${w.id}" d="${dd}"/><path class="w" id="w-${w.id}" d="${dd}"/>`;
+    const num=NODES[w.a].w||NODES[w.b].w;
+    const m=wireMid(w);
+    if(num&&num!=='1'&&num!=='2'&&m.horiz&&m.len>=16) h+=`<text class="wnum" x="${m.x}" y="${m.y-5}">${num}</text>`;
+  }
   for(const e of ELIST){
+    if(e.sheet!==sheet||e.kind==='int') continue;
     const ang=Math.atan2(e.y2-e.y1,e.x2-e.x1)*180/Math.PI;
     h+=`<g class="el" id="e-${e.id}" data-el="${e.id}" transform="translate(${e.x1} ${e.y1}) rotate(${ang})">${sym(e)}<rect class="hit" x="-2" y="-20" width="${e.len+4}" height="40"/></g>`;
+    if(!e.label) continue;
     const big=['coil','sol','lamp','heater'].includes(e.kind);
-    if(e.kind==='fuse') h+=`<text class="lbl" x="${e.x1+22}" y="${(e.y1+e.y2)/2+5}">${e.label}</text>`;
+    if(e.x1===e.x2) h+=`<text class="lbl" x="${e.x1+(e.x1>600?-14:14)}" y="${(e.y1+e.y2)/2+5}" text-anchor="${e.x1>600?'end':'start'}">${e.label}</text>`;
     else h+=`<text class="lbl${big?' big':''}" x="${(e.x1+e.x2)/2}" y="${e.y1-(big?20:22)}">${e.label}</text>`;
   }
-  h+=`<g id="marks"></g>`;
-  // nodes
-  for(const id of NODE_IDS){ const n=NODES[id]; h+=`<circle class="nd" cx="${n.x}" cy="${n.y}" r="3.2"/>`; }
-  for(const id of NODE_IDS){ const n=NODES[id]; h+=`<circle class="ndhit" data-node="${id}" cx="${n.x}" cy="${n.y}" r="10"/>`; }
-  h+=`<g class="probe" id="pr-r" hidden><circle r="10" fill="#e53b2c"/><text y="4.5">+</text></g>`;
-  h+=`<g class="probe" id="pr-b" hidden><circle r="10" fill="#151515"/><text y="4.5">−</text></g>`;
+  h+=`<g id="marks-${sheet}"></g>`;
+  for(const id of NODE_IDS){ const n=NODES[id]; if(n.sheet!==sheet||id.endsWith(':a')&&EL[id.slice(0,-2)]?.kind==='int'||id.endsWith(':b')&&EL[id.slice(0,-2)]?.kind==='int') continue; h+=`<circle class="nd" cx="${n.x}" cy="${n.y}" r="3.2"/>`; }
+  for(const id of NODE_IDS){ const n=NODES[id]; if(n.sheet!==sheet||(id.endsWith(':a')||id.endsWith(':b'))&&EL[id.slice(0,-2)]?.kind==='int') continue; h+=`<circle class="ndhit" data-node="${id}" cx="${n.x}" cy="${n.y}" r="10"/>`; }
+  h+=`<g class="probe" id="pr-r-${sheet}" hidden><circle r="10" fill="#e53b2c"/><text y="4.5">+</text></g>`;
+  h+=`<g class="probe" id="pr-b-${sheet}" hidden><circle r="10" fill="#151515"/><text y="4.5">−</text></g>`;
   svg.innerHTML=h;
-  for(const w of WIRES) wEls[w.id]=svg.querySelector('#w-'+w.id);
-  for(const e of ELIST) eEls[e.id]=svg.querySelector('#e-'+e.id);
+}
+function buildSVG(){
+  buildSheet('ctrl'); buildSheet('main');
+  for(const w of WIRES) if(!w.hidden) wEls[w.id]=document.getElementById('w-'+w.id);
+  for(const e of ELIST) if(e.kind!=='int') eEls[e.id]=document.getElementById('e-'+e.id);
 }
 
 /* ========== 盤內元件 ==========
-   TILE_DEFS 每一列是 [程式名稱, 顯示名稱, 說明, 1＝只顯示狀態不能手動壓]。 */
-const TILE_DEFS=[
-  ['X','X','輔助電驛'],['MCP','MCP','冰水泵'],['MCT','MCT','冷卻水泵'],['MCF','MCF','水塔風扇'],
-  ['MCM','MCM','壓縮機主'],['MCS','MCS','Y 接觸器'],['MCD','MCD','Δ 接觸器'],['TR','TR','限時電驛'],
-  ['3E','3E','保護電驛',1],['THP','THP','冰水泵 OL',1],['THT','THT','冷卻泵 OL',1],['THF','THF','風扇 OL',1],
-  ['THC','THC','壓縮機 OL',1],['HP','HP','高壓開關',1]];
+   TILE_DEFS 每一列是 [程式名稱, 說明]；PROT_DEFS 是保護與檢出元件（只顯示狀態）。 */
+const TILE_DEFS=[['X1','主控電驛'],['X2','相序保持'],['X3','遠控電驛'],['X4','油位電驛'],['52C','MCM 主'],['6S','MCS (Y)'],['42D','MCD (Δ)'],
+  ['2S','Y-Δ 計時'],['2G1','再起動'],['2G2','雙延時'],['2G3','低油位'],['2G4','油位'],['2G5','水壓差'],['2G6','2G 30s']];
+const PROT_DEFS=[['47R','相序／欠相'],['51C','過載'],['49C','內載過電流'],['63HR','高壓'],['63LP','低壓'],['26W','防凍'],['23C3','吐出溫度'],['23C4','回流管溫度'],['EW','水壓差'],['LO','油位']];
 function buildTiles(){
-  $('#tiles').innerHTML=TILE_DEFS.map(([k,l,n,st])=>`<button class="tile${st?' static':''}" id="t-${k}" data-relay="${st?'':k}" ${st?'tabindex="-1"':''}><b>${l}</b><small>${n}</small><span class="st">—</span></button>`).join('');
+  $('#tilesR').innerHTML=TILE_DEFS.map(([k,n])=>`<button class="tile" id="t-${k}" data-relay="${k}"><b>${k}</b><small>${n}</small><span class="st">—</span></button>`).join('');
+  $('#tilesP').innerHTML=PROT_DEFS.map(([k,n])=>`<div class="tile static" id="t-${k}"><b>${k}</b><small>${n}</small><span class="st">—</span></div>`).join('');
 }
 
 /* ========== 渲染 ==========
    render() 每 0.1 秒把狀態 S 畫到畫面：燈號、盤內元件、現場設備、電表讀值、探棒位置。 */
 function render(){
-  // stats
   $('#stScore').textContent=E.score;
   $('#stTime').textContent=fmtT(E.elapsed);
   $('#stFound').textContent=E.faults.filter(f=>f.found).length+'/'+E.faults.length;
-  // NFB
-  $('#btnNfb').setAttribute('aria-pressed',S.power);
-  $('#nfbTxt').textContent=S.power?'ON 送電中':'OFF 斷電';
-  $('#pbOn').classList.toggle('down',S.pressed.ON||S.latch.ON);
-  $('#pbOff').classList.toggle('down',S.pressed.OFF||S.latch.OFF);
-  $('#pbOn').classList.toggle('latched',S.latch.ON);
-  $('#pbOff').classList.toggle('latched',S.latch.OFF);
-  for(const id of ['GL','RL1','RL2','RL3','RL4','YL']) $('#lp-'+id).classList.toggle('lit',!!S.loadOn[id]);
-  // tiles
+  $('#btnNfb1').setAttribute('aria-pressed',S.nfb1); $('#nfb1Txt').textContent=S.nfb1?'ON 送電':'OFF';
+  $('#btnNfb2').setAttribute('aria-pressed',S.nfb2); $('#nfb2Txt').textContent=S.nfb2?'ON 送電':'OFF';
+  $('#btnEstop').setAttribute('aria-pressed',S.estop);
+  document.querySelectorAll('.sel button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sw===S.sw));
+  $('#togP1').setAttribute('aria-checked',S.pump1); $('#togP2').setAttribute('aria-checked',S.pump2); $('#togRem').setAttribute('aria-checked',S.remote);
+  for(const [id,k] of [['#pbOn','ON'],['#pbOff','OFF']]){ $(id).classList.toggle('down',S.pressed[k]||S.latch[k]); $(id).classList.toggle('latched',S.latch[k]); }
+  for(const id of ['WL','GL1','GL2','RL1','YL1','YL2','YL3','YL4','YL5','YL6','YL7']) $('#lp-'+id).classList.toggle('lit',!!S.loadOn[id]);
+  // 盤內元件
   for(const [k] of TILE_DEFS){
-    const t=$('#t-'+k); const st=t.querySelector('.st');
-    if(RELAYS.includes(k)){
-      const on=!!S.en[k];
-      t.classList.toggle('on',on); t.classList.toggle('man',!S.power&&!!S.manual[k]);
-      if(k==='TR') st.textContent=on?(S.power?(S.trDone?'已動作':'計時 '+Math.max(0,4-S.trTime).toFixed(1)+' s'):'手動壓下'):'釋放';
-      else st.textContent=on?(S.power?'吸合':'手動壓下'):'釋放';
-    } else {
-      let trip=false;
-      if(k==='THC') trip=S.thcTrip; if(k==='HP') trip=S.hpTrip;
-      t.classList.toggle('trip',trip); st.textContent=trip?'跳脫':'正常';
-    }
+    const t=$('#t-'+k), st=t.querySelector('.st'), on=!!S.en[k];
+    t.classList.toggle('on',on); t.classList.toggle('man',!S.nfb2&&!!S.manual[k]);
+    if(!S.nfb2&&S.manual[k]){ st.textContent='手動壓下'; continue; }
+    const T=TIMERS[k];
+    if(!T){ st.textContent=on?'吸合':'釋放'; continue; }
+    const tm=S.tm[k];
+    if(T.type==='on') st.textContent=on?(tm.out?'已動作':`計時 ${Math.max(0,T.d-tm.t).toFixed(1)}s`):'釋放';
+    else if(T.type==='off') st.textContent=on?'通電':(tm.out?`延時 ${Math.max(0,T.d-tm.t).toFixed(1)}s`:'釋放');
+    else st.textContent=on?(tm.out?'ON 輸出':'OFF 間隔'):'釋放';
   }
-  // plant
-  $('#gcw').classList.toggle('run',S.flow2>0.5);
-  $('#gch').classList.toggle('run',S.flow1>0.5);
-  $('#grf').classList.toggle('run',S.comp!=='stop');
-  $('#fan').classList.toggle('spin',!!S.fan);
-  $('#p1').classList.toggle('spin',!!S.p1);
-  $('#p2').classList.toggle('spin',!!S.p2);
-  $('#fs1').classList.toggle('on',S.flow1>0.8);
-  $('#fs2').classList.toggle('on',S.flow2>0.8);
-  $('#svg-sv').classList.toggle('on',!!S.sv);
-  $('#heat').classList.toggle('on',!!S.loadOn.CH);
-  $('#compState').textContent={stop:'停止',Y:'Y 啟動',D:'Δ 運轉'}[S.comp];
+  const prot={ '47R':[!S.r47ok,S.r47ok?'正常':'異常'], '51C':[S.ol51,S.ol51?'跳脫':'正常'], '49C':[S.t49,S.t49?'動作':'正常'],
+    '63HR':[S.hpTrip,S.hpTrip?'跳脫':'正常'], '63LP':[S.lpOpen,S.lpOpen?'開路':'正常'], '26W':[S.frz,S.frz?'動作':'正常'],
+    '23C3':[false,S.td95?'閉合（高溫）':'開路'], '23C4':[false,'正常'], 'EW':[S.flow1<=0.8,S.flow1>0.8?'有壓差':'無壓差'], 'LO':[false,'油位正常'] };
+  for(const k in prot){ const t=$('#t-'+k); t.classList.toggle('trip',prot[k][0]); t.querySelector('.st').textContent=prot[k][1]; }
+  // 現場設備
+  $('#gcw').classList.toggle('run',S.flow2>0.5); $('#gch').classList.toggle('run',S.flow1>0.5);
+  $('#grf').classList.toggle('run',S.comp==='Y'||S.comp==='D');
+  $('#fan').classList.toggle('spin',S.pump2); $('#p1').classList.toggle('spin',S.pump1); $('#p2').classList.toggle('spin',S.pump2);
+  $('#fs1').classList.toggle('on',S.flow1>0.8); $('#fs2').classList.toggle('on',S.flow2>0.8);
+  $('#svg-sv1').classList.toggle('on',!!S.loadOn.SV1); $('#svg-sv2').classList.toggle('on',!!S.loadOn.SV2);
+  $('#heat').classList.toggle('on',!!S.loadOn.CCH);
+  $('#compState').textContent={stop:'停止',Y:'Y 起動',D:'Δ 運轉',hum:'嗡嗡聲!'}[S.comp];
   $('#compA').textContent=S.compA.toFixed(1)+' A';
-  $('#tTch').textContent=S.Tch.toFixed(1)+' °C';
-  $('#tTret').textContent=S.Tret.toFixed(1)+' °C';
-  $('#tTcw').textContent=S.Tcw.toFixed(1)+' °C';
+  $('#tTd').textContent='吐出 '+S.Td.toFixed(0)+' °C';
+  $('#tTch').textContent=S.Tch.toFixed(1)+' °C'; $('#tTret').textContent=S.Tret.toFixed(1)+' °C'; $('#tTcw').textContent=S.Tcw.toFixed(1)+' °C';
   $('#hpNeedle').setAttribute('transform',`rotate(${-135+clamp(S.HP,0,30)/30*270})`);
   $('#lpNeedle').setAttribute('transform',`rotate(${-135+clamp(S.LP,0,10)/10*270})`);
-  $('#hpTxt').textContent=S.HP.toFixed(1);
-  $('#lpTxt').textContent=S.LP.toFixed(1);
-  const hl=$('#hpLbl'); hl.textContent=S.hpTrip?'HP 跳脫':'高壓'; hl.classList.toggle('warnt',S.hpTrip);
-  const ll=$('#lpLbl'); ll.textContent=S.lpOpen?'LP 開路':'低壓'; ll.classList.toggle('warnt',S.lpOpen);
-  // meter
+  $('#hpTxt').textContent=S.HP.toFixed(1); $('#lpTxt').textContent=S.LP.toFixed(1);
+  const hl=$('#hpLbl'); hl.textContent=S.hpTrip?'63HR 跳脫':'高壓'; hl.classList.toggle('warnt',S.hpTrip);
+  const ll=$('#lpLbl'); ll.textContent=S.lpOpen?'63LP 開路':'低壓'; ll.classList.toggle('warnt',S.lpOpen);
+  // 電表與探棒
   const rd=meterReading();
-  $('#lcdVal').textContent=rd.v; $('#lcdUnit').textContent=rd.u;
-  $('#lcd').classList.toggle('danger',!!rd.danger);
-  $('#prR').textContent=M.probe.r?NODES[M.probe.r].name:'未接';
-  $('#prB').textContent=M.probe.b?NODES[M.probe.b].name:'未接';
-  $('#selR').setAttribute('aria-pressed',M.next==='r');
-  $('#selB').setAttribute('aria-pressed',M.next==='b');
-  for(const k of ['r','b']){
-    const g=svg.querySelector('#pr-'+k); const id=M.probe[k];
-    if(id){ const n=NODES[id]; const off=(M.probe.r===M.probe.b&&k==='b')?8:0; g.setAttribute('transform',`translate(${n.x+off} ${n.y-off})`); g.removeAttribute('hidden'); }
+  $('#lcdVal').textContent=rd.v; $('#lcdUnit').textContent=rd.u; $('#lcd').classList.toggle('danger',!!rd.danger);
+  $('#prR').textContent=MS.probe.r?nodeName(MS.probe.r):'未接';
+  $('#prB').textContent=MS.probe.b?nodeName(MS.probe.b):'未接';
+  $('#selR').setAttribute('aria-pressed',MS.next==='r'); $('#selB').setAttribute('aria-pressed',MS.next==='b');
+  for(const sh of ['ctrl','main']) for(const k of ['r','b']){
+    const g=document.getElementById(`pr-${k}-${sh}`); const id=MS.probe[k];
+    if(id&&NODES[id].sheet===sh){ const n=NODES[id]; const off=(MS.probe.r===MS.probe.b&&k==='b')?8:0; g.setAttribute('transform',`translate(${n.x+off} ${n.y-off})`); g.removeAttribute('hidden'); }
     else g.setAttribute('hidden','');
   }
+  $('#guideBox').hidden=!MS.guide; if(MS.guide) $('#guideTxt').textContent=guideText();
   renderDiagram();
 }
 function renderDiagram(){
-  const live=M.live;
-  const V=S.V, root=S.nets&&S.nets.root;
-  const rN=root?root[NI.SRC_N]:-1;
+  const live=MS.live, V=S.V, root=S.nets&&S.nets.root;
+  const rT=root?root[NI.mT]:-1;
   for(const w of WIRES){
-    const el=wEls[w.id]; let cls='w';
-    if(live&&S.power&&V){
+    const el=wEls[w.id]; if(!el) continue; let cls='w';
+    if(live&&V){
       const ra=root[NI[w.a]], rb=root[NI[w.b]];
-      if(ra===rb){ if(ra===rN) cls+=' neu'; else if(V[NI[w.a]]>150) cls+=' hot'; }
+      if(ra===rb){
+        const ph=phaseOf(w.a);
+        if(NODES[w.a].sheet==='main'){ if(ph) cls+=' hot'; }
+        else if(ph==='T') cls+=' neu';
+        else if(vdiff(V,NI[w.a],NI.mT)>150) cls+=' hot';
+      }
     }
     if(el.getAttribute('class')!==cls) el.setAttribute('class',cls);
   }
   for(const e of ELIST){
-    const el=eEls[e.id]; let cls='el';
-    if(live){
-      if(!e.R && isClosed(e,S.en)) cls+=' closed';
-      if(e.R && S.loadOn[e.id]) cls+=' on';
-    }
+    const el=eEls[e.id]; if(!el) continue; let cls='el';
+    if(live){ if(!e.R&&isClosed(e,S.en)) cls+=' closed'; if(e.R&&S.loadOn[e.id]) cls+=' on'; }
     if(el.getAttribute('class')!==cls) el.setAttribute('class',cls);
   }
 }
 function renderMarks(){
-  let h='';
+  const out={ctrl:'',main:''};
   for(const f of E.faults){
-    if(!f.found && !E.revealed) continue;
-    let x,y;
-    if(f.kind==='el'){ const e=EL[f.id]; x=(e.x1+e.x2)/2; y=Math.max(e.y1,e.y2)+(e.kind==='fuse'?-20:28); if(e.kind==='fuse'){x=e.x1+46;} }
-    else { const w=WIRES.find(w=>w.id===f.id); [x,y]=wireMid(w); y+=16; }
-    const ok=f.found; const t=ok?'已修復':'故障';
-    h+=`<g class="pill ${ok?'ok':'bad'}" transform="translate(${x} ${y})"><rect x="-26" y="-9" width="52" height="18"/><text y="4">${t}</text></g>`;
+    if(!f.found&&!E.revealed) continue;
+    let x,y,sh;
+    if(f.kind==='el'){ const e=EL[f.id]; sh=e.sheet; x=(e.x1+e.x2)/2; y=Math.max(e.y1,e.y2)+28; if(e.x1===e.x2){ x=e.x1+(e.x1>600?-48:48); y=(e.y1+e.y2)/2; } }
+    else { const w=WIRES.find(q=>q.id===f.id); sh=NODES[w.a].sheet; const m=wireMid(w); x=m.x; y=m.y+16; }
+    const ok=f.found;
+    out[sh]+=`<g class="pill ${ok?'ok':'bad'}" transform="translate(${x} ${y})"><rect x="-26" y="-9" width="52" height="18" rx="9"/><text y="4">${ok?'已修復':'故障'}</text></g>`;
   }
-  svg.querySelector('#marks').innerHTML=h;
+  for(const sh of ['ctrl','main']) document.getElementById('marks-'+sh).innerHTML=out[sh];
 }
 function renderEvents(){
-  $('#events').innerHTML=E.events.map(e=>`<li class="${e.kind}"><time>${e.t}</time><span>${e.msg}</span></li>`).join('')||'<li><span style="color:var(--muted)">NFB 送電後，現場動作會記錄在這裡。</span></li>';
+  $('#events').innerHTML=E.events.map(e=>`<li class="${e.kind}"><time>${e.t}</time><span>${e.msg}</span></li>`).join('')||'<li><span style="color:var(--muted)">送電後，現場動作會記錄在這裡。</span></li>';
 }
 function renderJudge(){
   $('#progress').innerHTML=E.faults.map(f=>`<span class="${f.found?'done':''}"></span>`).join('');
@@ -1047,134 +1344,164 @@ function renderLog(){
   $('#logBody').innerHTML=E.log.map(r=>`<tr><td class="t">${r.t}</td><td>${r.mode}</td><td>${r.pw}</td><td>${r.r}</td><td>${r.b}</td><td class="v">${r.v}</td></tr>`).join('');
 }
 
+/* ========== 【操作引導】 ==========
+   依目前狀態給玩家「下一步」建議。只看得到的現象，不會直接說出故障位置。 */
+function guideText(){
+  if(E.ended) return '本題已結束，按「出新題」繼續練習。';
+  if(!S.nfb1) return '把主電源 NFB1 打 ON。47R 要有三相電源，保護迴路才會通。';
+  if(!S.nfb2) return '把控制電源 NFB2 打 ON，確認 WL 電源燈亮。';
+  if(S.estop) return '緊急開關 E-STOP 被壓下，先把它解除。';
+  if(!S.loadOn.WL) return 'WL 電源燈沒亮：控制電源（NFB2 → D-FUSE → E-STOP）或 WL 本身可能有問題，用 ACV 檔量 1 號線與 2 號線。';
+  if(!S.pump1||!S.pump2) return '啟動冰水泵與冷卻水泵：F.S1、F.S2 與 EW 需要水流才會閉合。';
+  if(S.sw!=='near'&&!(S.sw==='remote'&&S.remote)) return '選擇開關 SW 切到「近控」。';
+  if(!S.en.X1) return '按住起動 PB。若 X1 不吸合，黑棒放 N 母線（2 號線），紅棒沿 9 → 22 號線逐點量，找出 220 V 消失的位置。';
+  if(S.comp==='hum') return '壓縮機嗡嗡聲：切到「主電路」，檢查 NFB1、MCM、MCS、MCD 各相。';
+  if(S.comp==='stop'){
+    if(!S.cool) return '冰水溫度已到（23C1 OUT2），屬於正常停機，等水溫回升。';
+    if(S.en['52C']||S.en['6S']||S.en['42D']) return '接觸器有吸合但壓縮機沒轉：比對 Y-Δ 順序（6S → 52C → 2S → 42D），也檢查主電路。';
+    if(!S.tm['2G1'].out) return '等待 2G1 再起動延時（練習縮短為 12 秒）。';
+    return '壓縮機該起動卻沒動：沿主機控制迴路 33 → 36 號線量測，比對 6S、52C 的動作順序。';
+  }
+  if(S.comp==='Y'&&S.yTime>6) return 'Y 接線運轉太久沒切換 Δ：檢查 2S 與 42D 這兩行。';
+  return '系統運轉中。觀察 Y-Δ 切換、吐出溫度、SV2 旁通與冰水溫度是否正常。';
+}
+
 /* ========== 三用電表 ==========
    meterReading() 決定液晶要顯示什麼；fmtR() 把電阻換成 Ω／kΩ／MΩ；超過 20 MΩ 顯示 OL。 */
 function fmtR(R){
   if(!isFinite(R)||R>2e7) return {v:'OL',u:'Ω'};
   R=R*(1+(Math.random()-0.5)*0.003);
-  if(R<0.5) R=0.2+Math.random()*0.1;
+  if(R<0.5) R=Math.max(R,0.2)+Math.random()*0.1;
   if(R<1000) return {v:R.toFixed(1),u:'Ω'};
   if(R<1e6) return {v:(R/1000).toFixed(R<1e4?3:2),u:'kΩ'};
   return {v:(R/1e6).toFixed(2),u:'MΩ'};
 }
+function liveProbe(id){
+  if(['mR','mS','mT','cR','cT'].includes(id)) return true;
+  const sh=NODES[id].sheet;
+  return sh==='ctrl' ? S.nfb2 : S.nfb1;
+}
 function meterReading(){
-  if(M.meter==='OFF') return {v:'OFF',u:''};
-  const {r,b}=M.probe;
-  if(M.meter==='ACV'){
+  if(MS.meter==='OFF') return {v:'OFF',u:''};
+  const {r,b}=MS.probe;
+  if(MS.meter==='ACV'){
     let v=0;
-    if(r&&b&&S.power&&S.V){ v=Math.abs(S.V[NI[r]]-S.V[NI[b]]); v = v>1 ? v+(Math.random()-0.5)*0.6 : 0; }
+    if(r&&b&&S.V){ v=vdiff(S.V,NI[r],NI[b]); v = v>1 ? v+(Math.random()-0.5)*0.6 : 0; }
     return {v:v.toFixed(1),u:'V AC'};
   }
   if(!r||!b) return {v:'OL',u:'Ω'};
-  if(S.power) return {v:'Err',u:'帶電!',danger:true};
+  if(liveProbe(r)||liveProbe(b)) return {v:'Err',u:'帶電!',danger:true};
   return fmtR(measureR(S.nets,r,b));
 }
 function logReading(){
-  const {r,b}=M.probe; if(!r||!b||M.meter==='OFF') return;
+  const {r,b}=MS.probe; if(!r||!b||MS.meter==='OFF') return;
   const rd=meterReading();
-  const row={t:fmtT(E.elapsed),mode:M.meter==='ACV'?'ACV':'Ω',pw:S.power?'送電':'斷電',r:NODES[r].name,b:NODES[b].name,v:rd.v+' '+rd.u};
+  const pw=(S.nfb1?'主ON':'主OFF')+'／'+(S.nfb2?'控ON':'控OFF');
+  const row={t:fmtT(E.elapsed),mode:MS.meter==='ACV'?'ACV':'Ω',pw,r:nodeName(r),b:nodeName(b),v:rd.v+' '+rd.u};
   const last=E.log[0];
   if(last&&last.mode===row.mode&&last.r===row.r&&last.b===row.b&&last.pw===row.pw) E.log[0]=row; else E.log.unshift(row);
-  if(E.log.length>60) E.log.length=60;
+  if(E.log.length>80) E.log.length=80;
   renderLog();
 }
 function checkLiveOhm(){
-  if(M.meter==='OHM'&&S.power&&M.probe.r&&M.probe.b&&!M.penalized&&!E.ended){
+  const {r,b}=MS.probe;
+  if(MS.meter==='OHM'&&r&&b&&(liveProbe(r)||liveProbe(b))&&!MS.penalized&&!E.ended){
     // 【計分】帶電使用電阻檔：扣 5 分
-    M.penalized=true; E.score=Math.max(0,E.score-5);
-    ev('危險：帶電狀態使用電阻檔量測（−5 分）。量電阻前請先把 NFB 打 OFF。','bad');
+    MS.penalized=true; E.score=Math.max(0,E.score-5);
+    ev('危險：帶電狀態使用電阻檔量測（−5 分）。量電阻前請先把對應的 NFB 打 OFF。','bad');
   }
 }
-function placeProbe(id){
-  M.probe[M.next]=id; M.next=M.next==='r'?'b':'r'; M.penalized=false;
-  checkLiveOhm(); logReading();
-}
+function placeProbe(id){ MS.probe[MS.next]=id; MS.next=MS.next==='r'?'b':'r'; MS.penalized=false; checkLiveOhm(); logReading(); }
 function setMeter(m){
-  M.meter=m; M.penalized=false;
+  MS.meter=m; MS.penalized=false;
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));
   checkLiveOhm(); logReading();
 }
 
 /* ========== 操作 ==========
-   setPower() 是 NFB；bindPB() 讓按鈕「送電時按住才算按下、斷電時點一下＝持續壓住」。 */
-function setPower(on){
-  if(on===S.power) return;
-  S.power=on;
-  if(on){ S.manual={}; S.latch={ON:false,OFF:false}; ev('NFB 送電'); }
-  else { ev('NFB 斷電'); }
-  M.penalized=false; checkLiveOhm();
+   主電源 NFB1、控制電源 NFB2 分開；bindPB() 讓按鈕「送電時按住才算按下、斷電時點一下＝持續壓住」。 */
+function setNfb(which,on){
+  if(S[which]===on) return;
+  S[which]=on;
+  if(which==='nfb2'){ if(on){ S.manual={}; S.latch={ON:false,OFF:false}; } }
+  ev((which==='nfb1'?'主電源 NFB1 ':'控制電源 NFB2 ')+(on?'送電':'斷電'));
+  MS.penalized=false; checkLiveOhm();
 }
 function bindPB(btn,key){
-  const down=e=>{ if(!S.power) return; e.preventDefault(); S.pressed[key]=true; try{btn.setPointerCapture(e.pointerId);}catch(_){} };
-  const up=()=>{ if(S.pressed[key]){ S.pressed[key]=false; } };
+  const down=e=>{ if(!S.nfb2) return; e.preventDefault(); S.pressed[key]=true; try{btn.setPointerCapture(e.pointerId);}catch(_){} };
+  const up=()=>{ S.pressed[key]=false; };
   btn.addEventListener('pointerdown',down);
   btn.addEventListener('pointerup',up); btn.addEventListener('pointercancel',up); btn.addEventListener('lostpointercapture',up);
-  btn.addEventListener('click',()=>{ if(!S.power){ S.latch[key]=!S.latch[key]; } });
-  btn.addEventListener('keydown',e=>{ if(S.power&&(e.key===' '||e.key==='Enter')){ e.preventDefault(); S.pressed[key]=true; } });
+  btn.addEventListener('click',()=>{ if(!S.nfb2) S.latch[key]=!S.latch[key]; });
+  btn.addEventListener('keydown',e=>{ if(S.nfb2&&(e.key===' '||e.key==='Enter')){ e.preventDefault(); S.pressed[key]=true; } });
   btn.addEventListener('keyup',e=>{ if(e.key===' '||e.key==='Enter') S.pressed[key]=false; });
 }
 
 /* ========== 【出題】 ==========
-   newExam() 隨機挑選故障：每個迴路最多一處；勾選「含導線斷線」時至少一處是導線。
-   EXCLUDE 裡的元件不會被選成故障（例如 YL 只有過載時才會亮，壞了也看不出來）。
+   newExam() 隨機挑選故障：同一個迴路（zone）最多一處；勾選「含導線斷線」時至少一處是導線。
+   EXCLUDE 裡的元件不會被選成故障（例如異常指示燈平常不亮，壞了也看不出來）。
    想讓某個元件不出題，把它的 id 加進 EXCLUDE 即可。 */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-const EXCLUDE=new Set(['THCal','YL']);
+const EXCLUDE=new Set(['YL1','YL2','YL3','YL4','YL5','YL7','RL1','23C4n','63LPn','63HRn','51Cn','47Rn','26Wn','X2a','X2c','2G4b',
+  'SV1','2G6c','SWR','REM','X3c','X3a1','X3a2','23C4','63LP','63HR','26W','47Ri1','47Ri2','WU','WV','WW']);
+const NOWIRE_ZONES=new Set(['母線','遠控','電源','47R','壓縮機','主電路 Y 結線']);
 function newExam(){
-  const count=+$('#selCount').value, inclWire=$('#chkWire').checked;
+  const count=+$('#selCount').value, inclWire=$('#chkWire').checked, inclMain=$('#chkMain').checked;
   ELIST.forEach(e=>e.fault=false); WIRES.forEach(w=>w.fault=false);
   resetSim();
   Object.assign(E,{faults:[],score:100,elapsed:0,ended:false,revealed:false,log:[],judged:[],events:[],hinted:new Set()});
-  M.probe={r:null,b:null}; M.next='r'; M.penalized=false;
-  const pool=ELIST.filter(e=>!EXCLUDE.has(e.id)).map(e=>({kind:'el',id:e.id,rung:e.rung}));
-  const wpool=inclWire?WIRES.filter(w=>w.breakable).map(w=>({kind:'wire',id:w.id,rung:w.rung})):[];
-  const picks=[]; const used=new Set();
-  // 至少一題導線斷線（若勾選且題數 ≥ 2）
-  if(inclWire&&count>=2){ const w=shuffle(wpool.slice())[0]; picks.push(w); used.add(w.rung); }
+  MS.probe={r:null,b:null}; MS.next='r'; MS.penalized=false;
+  const okSheet=s=>inclMain||s==='ctrl';
+  const pool=ELIST.filter(e=>!EXCLUDE.has(e.id)&&okSheet(e.sheet)).map(e=>({kind:'el',id:e.id,zone:e.zone}));
+  const wpool=inclWire?WIRES.filter(w=>w.breakable&&!w.hidden&&!NOWIRE_ZONES.has(w.zone)&&okSheet(NODES[w.a].sheet)).map(w=>({kind:'wire',id:w.id,zone:w.zone})):[];
+  const picks=[], used=new Set();
+  if(wpool.length&&(count>=2||Math.random()<0.35)){ const w=shuffle(wpool.slice())[0]; picks.push(w); used.add(w.zone); }
   for(const c of shuffle(pool.slice())){
     if(picks.length>=count) break;
-    if(used.has(c.rung)) continue;
-    picks.push(c); used.add(c.rung);
+    if(used.has(c.zone)) continue;
+    picks.push(c); used.add(c.zone);
   }
-  if(inclWire&&count===1&&Math.random()<0.35){ picks.length=0; picks.push(shuffle(wpool.slice())[0]); }
   for(const p of picks){ if(p.kind==='el') EL[p.id].fault=true; else WIRES.find(w=>w.id===p.id).fault=true; p.found=false; }
   E.faults=picks;
-  $('#jMsg').className='msg info';
-  $('#jMsg').textContent=`新題目：共 ${picks.length} 處故障。先送電觀察，再用三用電表找出故障點。`;
+  say(`新題目：共 ${picks.length} 處故障。依「下一步」引導送電、起動，觀察哪裡不正常。`,'info');
   renderMarks(); renderJudge(); renderLog(); renderEvents();
   setTool('measure');
 }
+function wireRange(kind,id){
+  if(kind==='el'){ const e=EL[id]; return [e.wa,e.w].filter(Boolean); }
+  const w=WIRES.find(q=>q.id===id); return [NODES[w.a].w||NODES[w.b].w].filter(Boolean);
+}
 function describe(kind,id){
-  if(kind==='el'){ const e=EL[id]; return `${e.label}（${e.name}）`; }
-  const w=WIRES.find(w=>w.id===id);
-  return `導線：${NODES[w.a].name} → ${NODES[w.b].name}`;
+  if(kind==='el'){ const e=EL[id]; return `${e.label||e.name}（${e.name}）`; }
+  const w=WIRES.find(q=>q.id===id);
+  const num=NODES[w.a].w||NODES[w.b].w;
+  return `${NODES[w.a].sheet==='main'?'主電路 ':''}${num?num+' 號線':'導線'}：${NODES[w.a].desc} → ${NODES[w.b].desc}`;
 }
 // 【故障選項】判定時可選的故障情形；每組的「第一個」是正確答案（畫面上會打亂順序）
-const OPTS={contact:['接點不通（開路）','接點熔接（短路）'],pb:['接點不通（開路）','接點熔接（短路）'],coil:['線圈斷路','線圈層間短路'],
-  sol:['線圈斷路','線圈層間短路'],lamp:['燈泡燒毀（斷路）','燈座短路'],heater:['電熱器斷路','電熱器短路'],fuse:['保險絲熔斷','保險絲規格錯誤'],wire:['導線斷線','導線碰線（短路）']};
+const OPTS={contact:['接點不通（開路）','接點熔接（短路）'],pb:['接點不通（開路）','接點熔接（短路）'],brk:['極接觸不良（開路）','極熔接（短路）'],
+  coil:['線圈斷路','線圈層間短路'],sol:['線圈斷路','線圈層間短路'],lamp:['燈泡燒毀（斷路）','燈座短路'],heater:['電熱器斷路','電熱器短路'],
+  fuse:['保險絲熔斷','保險絲規格錯誤'],wire:['導線斷線','導線碰線（短路）']};
 function openJudge(kind,id){
   if(E.ended){ say('本題已結束，按「出新題」繼續練習。','info'); return; }
-  const done=E.faults.find(f=>f.kind===kind&&f.id===id&&f.found);
-  if(done){ say('這裡已經修復過了。','info'); return; }
+  if(E.faults.find(f=>f.kind===kind&&f.id===id&&f.found)){ say('這裡已經修復過了。','info'); return; }
   const k=kind==='el'?EL[id].kind:'wire';
   const opts=shuffle(OPTS[k].map((t,i)=>({t,i})));
-  const where=kind==='el'?RUNGS[EL[id].rung]:RUNGS[WIRES.find(w=>w.id===id).rung];
+  const zone=kind==='el'?EL[id].zone:WIRES.find(w=>w.id===id).zone;
   openModal('判定故障',
-    `<p><b style="color:var(--ink)">${describe(kind,id)}</b></p><p>所在迴路：${where}</p>
+    `<p><b style="color:var(--ink)">${describe(kind,id)}</b></p><p>所在迴路：${zone}</p>
      <div class="opts">${opts.map((o,n)=>`<label><input type="radio" name="fopt" value="${o.i}" ${n===0?'checked':''}>${o.t}</label>`).join('')}</div>
      <p>判定錯誤扣 10 分；位置對但故障情形錯誤扣 5 分。</p>`,
-    [{label:'取消'},{label:'送出判定',primary:true,fn:()=>{ const v=+document.querySelector('input[name=fopt]:checked').value; judge(kind,id,v); }}]);
+    [{label:'取消'},{label:'送出判定',primary:true,fn:()=>{ judge(kind,id,+document.querySelector('input[name=fopt]:checked').value); }}]);
 }
 function say(msg,cls){ const m=$('#jMsg'); m.className='msg '+cls; m.textContent=msg; }
 function judge(kind,id,choice){
-  const f=E.faults.find(f=>f.kind===kind&&f.id===id&&!f.found);
-  const name=describe(kind,id); const t=fmtT(E.elapsed);
+  const f=E.faults.find(q=>q.kind===kind&&q.id===id&&!q.found);
+  const name=describe(kind,id), t=fmtT(E.elapsed);
   // 【計分】位置與故障情形都對：修復；位置對但情形錯：扣 5 分；位置錯：扣 10 分
   if(f&&choice===0){
     f.found=true; if(kind==='el') EL[id].fault=false; else WIRES.find(w=>w.id===id).fault=false;
     E.judged.unshift({t,cls:'ok',msg:'正確：'+name+' — 已修復'});
-    say('判定正確，已修復。記得重新送電試車，確認其他迴路也正常。','ok');
-    ev('修復：'+name);
+    say('判定正確，已修復。記得重新送電試車，確認其他迴路也正常。','ok'); ev('修復：'+name);
   } else if(f){
     E.score=Math.max(0,E.score-5);
     E.judged.unshift({t,cls:'part',msg:'位置正確、故障情形錯誤：'+name+'（−5）'});
@@ -1185,33 +1512,33 @@ function judge(kind,id,choice){
     say('判定錯誤：這個元件／導線是正常的。','bad');
   }
   renderMarks(); renderJudge();
-  if(E.faults.every(f=>f.found)) finish();
+  if(E.faults.every(q=>q.found)) finish();
 }
 function finish(){
   E.ended=true;
   const wrong=E.judged.filter(j=>j.cls!=='ok').length;
-  const pass=E.score>=60;
-  openModal(pass?'全部故障已排除':'故障已排除，但分數未達 60',
+  openModal(E.score>=60?'全部故障已排除':'故障已排除，但分數未達 60',
     `<div class="sumgrid"><div><b>${E.score}</b><small>分數</small></div><div><b>${fmtT(E.elapsed)}</b><small>用時</small></div><div><b>${E.log.length}</b><small>量測次數</small></div></div>
      <p>誤判 ${wrong} 次、使用提示 ${E.hinted.size} 次。建議送電試車，確認壓縮機能完成 Y-Δ 切換並正常運轉。</p>`,
     [{label:'回到電路試車'},{label:'再出一題',primary:true,fn:newExam}]);
 }
 function hint(){
   if(E.ended){ say('本題已結束。','info'); return; }
-  const f=E.faults.find(f=>!f.found); if(!f) return;
+  const f=E.faults.find(q=>!q.found); if(!f) return;
   const key=f.kind+f.id;
   // 【計分】每處故障第一次看提示扣 5 分
   if(!E.hinted.has(key)){ E.hinted.add(key); E.score=Math.max(0,E.score-5); }
-  const rung=f.kind==='el'?EL[f.id].rung:WIRES.find(w=>w.id===f.id).rung;
-  say(`提示：有一處故障在「${RUNGS[rung]}」（第 ${RUNG_LINE[rung]} 行）。`,'info');
+  const zone=f.kind==='el'?EL[f.id].zone:WIRES.find(w=>w.id===f.id).zone;
+  const ws=wireRange(f.kind,f.id);
+  const where=ws.length===2?`，在 ${ws[0]} 號線與 ${ws[1]} 號線之間`:ws.length===1?`，${ws[0]} 號線附近`:'';
+  say(`提示：有一處故障在「${zone}」${where}。`,'info');
 }
 function reveal(){
-  if(E.ended&&!E.revealed){ return; }
+  if(E.ended) return;
   openModal('放棄本題？','<p>會在電路圖上標出所有故障位置，本題結束。</p>',
     [{label:'繼續作答'},{label:'顯示答案',primary:true,fn:()=>{
       E.revealed=true; E.ended=true; renderMarks();
-      const list=E.faults.map(f=>(f.found?'已找到：':'未找到：')+describe(f.kind,f.id)).join('；');
-      say('答案　'+list,'bad');
+      say('答案　'+E.faults.map(f=>(f.found?'已找到：':'未找到：')+describe(f.kind,f.id)).join('；'),'bad');
     }}]);
 }
 
@@ -1230,60 +1557,144 @@ function openModal(title,body,actions){
 }
 function closeModal(){ $('#modal').hidden=true; }
 $('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('#modal').hidden) closeModal(); });
 
-/* ========== 工具模式 ========== */
+/* ========== 工具模式與電路圖分頁 ========== */
 function setTool(t){
-  M.tool=t;
-  svg.classList.toggle('mark',t==='mark');
-  $('#toolMeasure').setAttribute('aria-pressed',t==='measure');
-  $('#toolMark').setAttribute('aria-pressed',t==='mark');
-  $('#toolHint').textContent=t==='mark'?'點選你認為故障的元件或導線。':'點電路圖上的端點放置探棒，紅黑棒輪流放置。';
+  MS.tool=t;
+  for(const s of Object.values(svgs)) s.classList.toggle('mark',t==='mark');
+  $('#toolMeasure').setAttribute('aria-pressed',t==='measure'); $('#toolMark').setAttribute('aria-pressed',t==='mark');
+  $('#toolHint').textContent=t==='mark'?'點選你認為故障的元件或導線。':'點電路圖上的端點放置探棒，紅黑棒輪流放置。兩張圖的端點可以互量。';
 }
+function setSheet(s){
+  MS.sheet=s; $('#wrapC').hidden=s!=='ctrl'; $('#wrapM').hidden=s!=='main';
+  $('#tabC').setAttribute('aria-pressed',s==='ctrl'); $('#tabM').setAttribute('aria-pressed',s==='main');
+}
+
+/* ========== 記事本 ==========
+   內容存在 localStorage（這台電腦這個瀏覽器）；換電腦或清除瀏覽資料就不會保留。 */
+const NOTE_KEY='chiller-notes-v1';
+const notes=$('#notes');
+try{ notes.value=localStorage.getItem(NOTE_KEY)||''; }catch(_){}
+let noteTimer=null;
+function saveNotes(){ try{ localStorage.setItem(NOTE_KEY,notes.value); $('#noteSave').textContent='已儲存 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); }catch(_){ $('#noteSave').textContent='這個瀏覽器無法儲存，請自行複製'; } }
+notes.addEventListener('input',()=>{ clearTimeout(noteTimer); noteTimer=setTimeout(saveNotes,500); });
+function insertNote(text){
+  const s=notes.selectionStart??notes.value.length, e2=notes.selectionEnd??notes.value.length;
+  const pre=notes.value.slice(0,s), add=(pre&&!pre.endsWith('\n')?'\n':'')+text+'\n';
+  notes.value=pre+add+notes.value.slice(e2); notes.focus(); notes.selectionStart=notes.selectionEnd=(pre+add).length; saveNotes();
+}
+$('#noteRead').addEventListener('click',()=>{
+  const {r,b}=MS.probe;
+  if(!r||!b||MS.meter==='OFF'){ insertNote(`[${fmtT(E.elapsed)}] （探棒還沒接好）`); return; }
+  const rd=meterReading(); insertNote(`[${fmtT(E.elapsed)}] ${MS.meter==='ACV'?'ACV':'Ω'} 紅:${nodeName(r)} 黑:${nodeName(b)} = ${rd.v} ${rd.u}`);
+});
+$('#noteTime').addEventListener('click',()=>insertNote(`[${fmtT(E.elapsed)}] `));
+$('#noteState').addEventListener('click',()=>{
+  const on=COILS.filter(k=>S.en[k]); const lamps=['WL','GL1','GL2','RL1','YL1','YL2','YL3','YL4','YL5','YL6','YL7'].filter(k=>S.loadOn[k]);
+  insertNote(`[${fmtT(E.elapsed)}] 吸合：${on.join('、')||'無'}；亮燈：${lamps.join('、')||'無'}；壓縮機：${$('#compState').textContent}`);
+});
+$('#noteClear').addEventListener('click',()=>openModal('清空記事本？','<p>記事本的內容會全部刪除，無法復原。</p>',[{label:'取消'},{label:'清空',primary:true,fn:()=>{ notes.value=''; saveNotes(); }}]));
+
+/* ========== 【導覽步驟】 ==========
+   每一步：sel＝要框起來的區塊（null＝畫面中央），title＝標題，text＝說明。 */
+const TOUR=[
+  {sel:null,title:'歡迎來到冰水主機故障檢修模擬',text:'每一題會隨機設定 1～3 處故障。你要像檢定一樣：送電觀察、用三用電表量測、找出故障並判定。接下來用 1 分鐘認識操作方式。'},
+  {sel:'#powerBox',title:'主電源與控制電源分開',text:'NFB1 是主電源（3φ 220 V，供壓縮機），NFB2 是控制電源（R、T 兩相 220 V，供控制電路）。建議先送 NFB1 再送 NFB2。紅色的 E-STOP 是緊急開關。'},
+  {sel:'#pumpBox',title:'外部設備連鎖',text:'冰水泵、冷卻水泵屬於外部設備。開了才有水流，F.S1、F.S2 流量開關和 EW 水壓差開關才會閉合。'},
+  {sel:'#opBox',title:'選擇開關與按鈕',text:'SW 切「近控」後按住起動 PB，X1 會吸合自保持。停止 PB 可以停機，也能解除 X2 相序異常保持。'},
+  {sel:'#guideBox',title:'下一步引導',text:'不知道接著做什麼時看這裡。它只根據看得到的現象給建議，不會直接告訴你故障位置。熟練後可以關掉。'},
+  {sel:'#tilesCard',title:'盤內元件',text:'電驛、接觸器、延時電驛的吸合狀態，以及保護元件是否跳脫。斷電時點電驛可以手動壓下，方便用電阻檔量它的接點。'},
+  {sel:'#meterBox',title:'三用電表',text:'選 ACV 量電壓（要送電）、Ω 量電阻（要斷電，帶電量電阻會扣分）。紅棒、黑棒輪流放，按「收回探棒」重來。'},
+  {sel:'#toolBox',title:'電路圖與模式',text:'「控制電路」和「主電路」兩張圖可以切換，線號和檢定圖相同。點圖上的黑色小圓點放探棒；切到「判定故障」後，點元件或導線作答。'},
+  {sel:'#noteCard',title:'我的記事本',text:'邊量邊記，按「插入目前讀值」會自動寫下探棒位置和讀數。內容存在這台電腦的瀏覽器裡。'},
+  {sel:'#judgeCard',title:'判定與計分',text:'起始 100 分：判定錯誤 −10、故障情形錯 −5、提示 −5、帶電量電阻 −5。全部修復後記得再送電試車。祝練習順利！'}
+];
+let tourI=0;
+function showTour(i){
+  tourI=i; const st=TOUR[i]; $('#tour').hidden=false;
+  $('#tourStep').textContent=`${i+1} / ${TOUR.length}`; $('#tourTitle').textContent=st.title; $('#tourText').textContent=st.text;
+  $('#tourPrev').hidden=i===0; $('#tourNext').textContent=i===TOUR.length-1?'開始練習':'下一步';
+  const hole=$('#tourHole'), pop=$('#tourPop');
+  const place=()=>{
+    const vw=window.innerWidth, vh=window.innerHeight, pw=pop.offsetWidth, ph=pop.offsetHeight;
+    if(!st.sel){ hole.style.cssText=`left:${vw/2}px;top:${vh/2}px;width:0;height:0`; pop.style.left=Math.max(16,(vw-pw)/2)+'px'; pop.style.top=Math.max(16,(vh-ph)/2)+'px'; return; }
+    const r=document.querySelector(st.sel).getBoundingClientRect(); const pad=6;
+    const top=Math.max(4,r.top-pad), h=Math.min(r.height+pad*2,vh-top-4);
+    hole.style.cssText=`left:${r.left-pad}px;top:${top}px;width:${r.width+pad*2}px;height:${h}px`;
+    let y=top+h+12; if(y+ph>vh-12) y=Math.max(12,top-ph-12); if(y+ph>vh-12) y=vh-ph-12;
+    pop.style.left=clamp(r.left,16,vw-pw-16)+'px'; pop.style.top=y+'px';
+  };
+  if(st.sel){ const el=document.querySelector(st.sel); el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); setTimeout(place,380); }
+  place();
+  $('#tourNext').focus();
+}
+function endTour(){ $('#tour').hidden=true; try{ localStorage.setItem('chiller-tour-done','1'); }catch(_){} }
+$('#tourNext').addEventListener('click',()=>{ tourI<TOUR.length-1?showTour(tourI+1):endTour(); });
+$('#tourPrev').addEventListener('click',()=>{ if(tourI>0) showTour(tourI-1); });
+$('#tourSkip').addEventListener('click',endTour);
+$('#btnTour').addEventListener('click',()=>showTour(0));
+window.addEventListener('resize',()=>{ if(!$('#tour').hidden) showTour(tourI); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(!$('#modal').hidden) closeModal(); else if(!$('#tour').hidden) endTour(); });
 
 /* ========== 事件綁定 ==========
    addEventListener('click', ...) 的意思是「被點到時執行這段程式」。 */
-svg.addEventListener('click',e=>{
-  const nd=e.target.closest('[data-node]');
-  if(nd&&M.tool==='measure'){ placeProbe(nd.dataset.node); render(); return; }
-  if(M.tool!=='mark') return;
-  const el=e.target.closest('[data-el]'); if(el){ openJudge('el',el.dataset.el); return; }
-  const w=e.target.closest('[data-wire]'); if(w){ openJudge('wire',w.dataset.wire); }
-});
-svg.addEventListener('pointerover',e=>{
-  const nd=e.target.closest('[data-node]'), el=e.target.closest('[data-el]'), w=e.target.closest('[data-wire]');
-  const info=$('#info');
-  if(nd){ info.innerHTML=`端點：<b>${NODES[nd.dataset.node].name}</b>`; }
-  else if(el){ const x=EL[el.dataset.el]; info.innerHTML=`<b>${x.label}</b>　${x.name}${x.desc?'：'+x.desc:''}　<span>（${RUNGS[x.rung]}）</span>`; }
-  else if(w){ const x=WIRES.find(q=>q.id===w.dataset.wire); info.innerHTML=`導線　<b>${NODES[x.a].name}</b> → <b>${NODES[x.b].name}</b>`; }
-});
+for(const svg of Object.values(svgs)){
+  svg.addEventListener('click',e=>{
+    const nd=e.target.closest('[data-node]');
+    if(nd&&MS.tool==='measure'){ placeProbe(nd.dataset.node); render(); return; }
+    if(MS.tool!=='mark') return;
+    const el=e.target.closest('[data-el]'); if(el){ openJudge('el',el.dataset.el); return; }
+    const w=e.target.closest('[data-wire]'); if(w) openJudge('wire',w.dataset.wire);
+  });
+  svg.addEventListener('pointerover',e=>{
+    const nd=e.target.closest('[data-node]'), el=e.target.closest('[data-el]'), w=e.target.closest('[data-wire]');
+    const info=$('#info');
+    if(nd) info.innerHTML=`端點：<b>${nodeName(nd.dataset.node)}</b>`;
+    else if(el){ const x=EL[el.dataset.el]; const ws=[x.wa,x.w].filter(Boolean).join(' – '); info.innerHTML=`<b>${x.label||x.name}</b>　${x.name}${x.desc?'：'+x.desc:''}${ws?'　（線號 '+ws+'）':''}`; }
+    else if(w) info.innerHTML=`導線　<b>${describe('wire',w.dataset.wire)}</b>`;
+  });
+}
 document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{ setMeter(b.dataset.mode); render(); }));
-$('#selR').addEventListener('click',()=>{ M.next='r'; render(); });
-$('#selB').addEventListener('click',()=>{ M.next='b'; render(); });
-$('#btnClr').addEventListener('click',()=>{ M.probe={r:null,b:null}; M.next='r'; render(); });
+$('#selR').addEventListener('click',()=>{ MS.next='r'; render(); });
+$('#selB').addEventListener('click',()=>{ MS.next='b'; render(); });
+$('#btnClr').addEventListener('click',()=>{ MS.probe={r:null,b:null}; MS.next='r'; render(); });
 $('#toolMeasure').addEventListener('click',()=>setTool('measure'));
 $('#toolMark').addEventListener('click',()=>setTool('mark'));
-$('#btnMark').addEventListener('click',()=>{ setTool('mark'); $('.dwrap').scrollIntoView({behavior:'smooth',block:'nearest'}); });
-$('#chkLive').addEventListener('change',e=>{ M.live=e.target.checked; render(); });
-$('#btnNfb').addEventListener('click',()=>{ setPower(!S.power); render(); });
+$('#tabC').addEventListener('click',()=>setSheet('ctrl'));
+$('#tabM').addEventListener('click',()=>setSheet('main'));
+// 電路圖縮放：100%～220%，放大後可以在框內捲動
+let zoom=1;
+function setZoom(z){ zoom=clamp(z,1,2.2); for(const s of Object.values(svgs)) s.style.width=(zoom*100)+'%'; }
+$('#zoomIn').addEventListener('click',()=>setZoom(zoom+0.3));
+$('#zoomOut').addEventListener('click',()=>setZoom(zoom-0.3));
+$('#btnMark').addEventListener('click',()=>{ setTool('mark'); $('#toolBox').scrollIntoView({behavior:'smooth',block:'nearest'}); });
+$('#chkLive').addEventListener('change',e=>{ MS.live=e.target.checked; render(); });
+$('#chkGuide').addEventListener('change',e=>{ MS.guide=e.target.checked; render(); });
+$('#btnNfb1').addEventListener('click',()=>{ setNfb('nfb1',!S.nfb1); render(); });
+$('#btnNfb2').addEventListener('click',()=>{ setNfb('nfb2',!S.nfb2); render(); });
+$('#btnEstop').addEventListener('click',()=>{ S.estop=!S.estop; ev(S.estop?'E-STOP 壓下':'E-STOP 解除',S.estop?'warn':'info'); render(); });
+document.querySelectorAll('.sel button').forEach(b=>b.addEventListener('click',()=>{ S.sw=b.dataset.sw; render(); }));
+$('#togP1').addEventListener('click',()=>{ S.pump1=!S.pump1; ev('冰水泵'+(S.pump1?'運轉':'停止')); render(); });
+$('#togP2').addEventListener('click',()=>{ S.pump2=!S.pump2; ev('冷卻水泵'+(S.pump2?'運轉':'停止')); render(); });
+$('#togRem').addEventListener('click',()=>{ S.remote=!S.remote; render(); });
 bindPB($('#pbOn'),'ON'); bindPB($('#pbOff'),'OFF');
-$('#rstHP').addEventListener('click',()=>{
-  if(!S.hpTrip){ ev('HP 未跳脫，不需復歸'); return; }
-  if(S.HP>15){ ev('排氣壓力仍高於 15 kg/cm²，HP 無法復歸，請等壓力下降','warn'); return; }
-  S.hpTrip=false; ev('HP 高壓開關已手動復歸');
+$('#rst63').addEventListener('click',()=>{
+  if(!S.hpTrip){ ev('63HR 未跳脫，不需復歸'); return; }
+  if(S.HP>15){ ev('排氣壓力仍高於 15 kg/cm²，63HR 無法復歸','warn'); return; }
+  S.hpTrip=false; ev('63HR 已手動復歸');
 });
-$('#rstTHC').addEventListener('click',()=>{ if(S.thcTrip){ S.thcTrip=false; ev('THC 過載電驛已復歸'); } else ev('THC 未跳脫，不需復歸'); });
-$('#btnSpeed').addEventListener('click',e=>{ M.speed=M.speed===1?3:1; e.target.textContent='時間 ×'+M.speed; });
-$('#tiles').addEventListener('click',e=>{
-  const t=e.target.closest('[data-relay]'); if(!t||!t.dataset.relay) return;
-  if(S.power){ $('#tileNote').textContent='送電中不可手動壓接觸器。請先把 NFB 打 OFF。'; return; }
+$('#rst51').addEventListener('click',()=>{ if(S.ol51){ S.ol51=false; ev('51C 過載電驛已復歸'); } else ev('51C 未跳脫，不需復歸'); });
+$('#btnSpeed').addEventListener('click',e=>{ MS.speed=MS.speed===1?3:1; e.target.textContent='時間 ×'+MS.speed; });
+$('#tilesR').addEventListener('click',e=>{
+  const t=e.target.closest('[data-relay]'); if(!t) return;
+  if(S.nfb2){ $('#tileNote').textContent='控制電源送電中不可手動壓電驛。請先把 NFB2 打 OFF。'; return; }
   const k=t.dataset.relay; S.manual[k]=!S.manual[k];
   $('#tileNote').textContent=S.manual[k]?`${k} 已手動壓下，可用 Ω 檔量它的接點。`:`${k} 已放開。`;
   render();
 });
 $('#btnNew').addEventListener('click',()=>{
   if(E.ended||E.log.length===0){ newExam(); return; }
-  openModal('換一題？','<p>目前題目的進度會清除。</p>',[{label:'取消'},{label:'出新題',primary:true,fn:newExam}]);
+  openModal('換一題？','<p>目前題目的進度會清除（記事本不會清除）。</p>',[{label:'取消'},{label:'出新題',primary:true,fn:newExam}]);
 });
 $('#btnHint').addEventListener('click',hint);
 $('#btnReveal').addEventListener('click',reveal);
@@ -1298,15 +1709,21 @@ function ticks(gid,max,red){
 ticks('hpTicks',30,20); ticks('lpTicks',10,1.5);
 
 /* ========== 啟動 ==========
-   網頁載入時執行：畫電路圖 → 建立盤內元件 → 出第一題 → 每 100 毫秒跑一次 tick()。 */
+   網頁載入時執行：畫電路圖 → 建立盤內元件 → 出第一題 → 每 100 毫秒跑一次 tick()。
+   第一次打開時自動播放操作導覽。 */
 buildSVG(); buildTiles(); newExam();
 let last=performance.now();
 function tick(){
   const now=performance.now(); const real=Math.min(0.25,(now-last)/1000); last=now;
   if(!E.ended) E.elapsed+=real;
-  stepLogic(); stepPhysics(real*M.speed); render();
+  stepLogic(); stepPhysics(real*MS.speed); render();
 }
-setInterval(tick,100); tick();})();
+setInterval(tick,100); tick();
+let tourDone=false; try{ tourDone=localStorage.getItem('chiller-tour-done')==='1'; }catch(_){}
+if(!tourDone) setTimeout(()=>showTour(0),500);
+// 測試用：在瀏覽器主控台可以用 __sim 查看內部狀態
+window.__sim={S,E,MS,EL,WIRES,NODES,setNfb,placeProbe,setMeter};
+})();
 </script>
 </body>
 </html>
