@@ -396,7 +396,7 @@ details.card p{font-size:13.5px;margin:6px 0}
     </div>
 
     <!-- 【電路圖】內容是空的，由 JavaScript 的 buildSheet() 自動畫出來 -->
-    <div class="dwrap" id="wrapC"><svg class="dia" id="diaC" viewBox="0 0 1380 1640" role="img" aria-label="冰水主機控制電路圖"></svg></div>
+    <div class="dwrap" id="wrapC"><svg class="dia" id="diaC" viewBox="0 0 1380 1820" role="img" aria-label="冰水主機控制電路圖"></svg></div>
     <div class="dwrap" id="wrapM" hidden><svg class="dia" id="diaM" viewBox="0 0 1060 520" role="img" aria-label="冰水主機主電路圖"></svg></div>
     <div class="info" id="info">把滑鼠移到元件或端點上可查看說明。藍綠色小數字是線號，和檢定圖相同。</div>
 
@@ -526,6 +526,12 @@ details.card p{font-size:13.5px;margin:6px 0}
         <text x="300" y="122" class="small">SV2 旁通</text>
         <g class="sv" id="svg-sv1" transform="translate(372 160)"><rect x="-6" y="-6" width="12" height="12"/></g>
         <text x="362" y="146" text-anchor="middle" class="small">SV1</text>
+        <!-- 容量控制電磁閥 CSV-1～3：亮紅色＝通電 -->
+        <text x="318" y="104" text-anchor="end" class="small">CSV</text>
+        <g class="sv" id="csv1" transform="translate(330 100)"><rect x="-6" y="-6" width="12" height="12"/></g>
+        <g class="sv" id="csv2" transform="translate(352 100)"><rect x="-6" y="-6" width="12" height="12"/></g>
+        <g class="sv" id="csv3" transform="translate(374 100)"><rect x="-6" y="-6" width="12" height="12"/></g>
+        <text x="330" y="89" text-anchor="middle" class="small">25</text><text x="352" y="89" text-anchor="middle" class="small">50</text><text x="374" y="89" text-anchor="middle" class="small">75</text>
         <g transform="translate(275 190)" class="sv"><path d="M-6 -9 L6 9 H-6 L6 -9 Z"/></g>
         <text x="288" y="194" class="small">膨脹閥</text>
         <g id="p2" transform="translate(165 85)"><circle r="13" class="eq"/><g class="rot"><path d="M0 -9 V9 M-9 0 H9" style="stroke:var(--ink);stroke-width:2"/></g></g>
@@ -582,12 +588,13 @@ details.card p{font-size:13.5px;margin:6px 0}
         <li>啟動冰水泵與冷卻水泵：F.S1、F.S2 閉合；EW 有壓差，2G5 通電；YL6 熄滅。</li>
         <li>SW 切「近控」：10 號線有電，LO 油位正常使 2G3 → X4 → 2G4 依序動作（2G4 計時中 YL1 會短暫亮）。</li>
         <li>按起動 PB：保護控制迴路 9～22 全通時 X1 吸合自保持。</li>
-        <li>23C1 OUT1（需冷）＋X1：2G1 再起動延時計時，時間到 6S（Y）先吸合，52C 再吸合，壓縮機 Y 啟動、GL1 亮、CCH 斷電、SV1 開。</li>
+        <li>23C1 OUT2 在需冷卻側（33 號線）＋X1：2G1 再起動延時計時，時間到 6S（Y）先吸合，52C 再吸合，壓縮機 Y 起動、GL1 亮、CCH 斷電、SV1 開；同時 CSV-1（25%）通電。</li>
+        <li>Δ 運轉後 2C1 計時 30 秒：CSV-1 斷電、2C2 開始計時；2C2 1 分鐘後 CSV-2（50%）通電，23C1 OUT1 閉合時 CSV-3（75%）也通電。</li>
         <li>2S 計時到：6S 釋放、42D 吸合，切換 Δ 運轉。</li>
         <li>吐出溫度高時 23C3 閉合，2G2 以 ON 5 秒／OFF 10 秒控制 SV2 旁通降溫。</li>
-        <li>冰水降到 7 °C：23C1 切到 OUT2，GL2 亮、壓縮機停機；回升到 10 °C 自動再起動。</li>
+        <li>冰水降到 7 °C：23C1 OUT2 切到 31 號線，GL2 亮、壓縮機停機；回升到 10 °C 自動再起動。</li>
       </ol>
-      <p>本電路依你提供的檢定接線圖繪製。容量控制迴路（41～46 號線、CSV）尚未加入。</p>
+      <p>本電路依檢定接線圖繪製；延時電驛的時間已縮短方便練習。</p>
     </details>
   </aside>
 </main>
@@ -807,35 +814,55 @@ row('異常指示',1140,'26W:a',[{id:'26Wn',kind:'contact',ct:'NO',owner:'26W',x
 row('遠控',1185,'JF',[{id:'X3c',kind:'coil',relay:'X3',R:1200,x:XC,label:'X3',name:'X3 遠控電驛線圈'}],N(1185)); d(1185,'X3 遠控電驛');
 
 // --- 主機控制迴路（23C1 溫度控制、Y-Δ 起動） ---
+// 23C1 OUT2 是 c 接點：需冷卻時接 33 號線（主機運轉），溫度到達時接 31 號線（GL2）
 row('溫度控制',1240,L(1240),[
-  {id:'OUT2',kind:'contact',ct:'NO',owner:'OUT2',tag:'T',x:120,label:'23C1 OUT2',w:'31',name:'冰水回水溫度控制器 OUT2（溫度到達）'},
+  {id:'OUT2b',kind:'contact',ct:'NC',owner:'TC',tag:'T',x:120,label:'23C1 OUT2',w:'31',name:'23C1 OUT2（溫度到達側）',desc:'冰水 ≤ 7 °C 時切到此側。'},
   {id:'GL2',kind:'lamp',R:2400,x:XC,label:'GL2',name:'溫度到達停機指示燈'}],N(1240)); d(1240,'GL2 溫度到達停機');
 row('主機控制迴路',1285,L(1285),[
-  {id:'OUT1',kind:'contact',ct:'NO',owner:'OUT1',tag:'T',x:120,label:'23C1 OUT1',w:'33',name:'冰水回水溫度控制器 OUT1（需冷卻）',desc:'冰水 ≥ 10 °C 閉合，≤ 7 °C 切到 OUT2。'},
+  {id:'OUT2a',kind:'contact',ct:'NO',owner:'TC',tag:'T',x:120,label:'23C1 OUT2',w:'33',name:'23C1 OUT2（需冷卻側）',desc:'冰水 ≥ 10 °C 切到此側，≤ 7 °C 切回 31 號線。'},
   {id:'X1a2',kind:'contact',ct:'NO',owner:'X1',x:300,label:'X1',w:'34',name:'X1 a 接點'}],J('J34',400,1285,'34'));
 row('主機控制迴路',1285,'J34',[{id:'2G1a',kind:'contact',ct:'NO',owner:'2G1',timer:true,x:440,label:'2G1',w:'35',name:'2G1 延時 a 接點（再起動延時）'}],J('J35',540,1285,'35'));
-row('主機控制迴路',1285,'J35',[{id:'6Sa',kind:'contact',ct:'NO',owner:'6S',x:600,label:'6S',w:'36',name:'6S a 接點'}],J('J36',860,1285,'36'));
+row('主機控制迴路',1285,'J35',[{id:'52Ca2',kind:'contact',ct:'NO',owner:'52C',x:600,label:'52C',w:'36',name:'52C 自保持 a 接點'}],J('J36',860,1285,'36'));
 row('主機控制迴路',1285,'J36',[{id:'52Cc',kind:'coil',relay:'52C',R:300,x:XC,label:'52C',name:'52C 主接觸器線圈 (MCM)'}],N(1285)); d(1285,'52C 主接觸器 MCM');
 J('J35a',540,1330,'35'); J('J36a',860,1330,'36');
 wire('J35','J35a','主機控制迴路'); wire('J36a','J36','主機控制迴路');
-row('主機控制迴路',1330,'J35a',[{id:'52Ca2',kind:'contact',ct:'NO',owner:'52C',x:600,label:'52C',w:'36',name:'52C 自保持 a 接點'}],'J36a');
-J('J36b',860,1375,'36'); J('J36c',860,1420,'36'); J('J36d',860,1465,'36');
-wire('J36a','J36b','Y-Δ 起動'); wire('J36b','J36c','運轉指示'); wire('J36c','J36d','Y-Δ 起動');
+row('主機控制迴路',1330,'J35a',[{id:'6Sa',kind:'contact',ct:'NO',owner:'6S',x:600,label:'6S',w:'36',name:'6S a 接點'}],'J36a');
+J('J36b',860,1375,'36'); J('J36c',860,1420,'36');
+wire('J36a','J36b','Y-Δ 起動'); wire('J36b','J36c','運轉指示');
 row('Y-Δ 起動',1375,'J36b',[{id:'2Sc',kind:'coil',relay:'2S',R:4000,x:XC,label:'2S',name:'Y-Δ 限時電驛線圈 2S (3～5 s)'}],N(1375)); d(1375,'2S Y-Δ 3~5s');
 row('運轉指示',1420,'J36c',[{id:'GL1',kind:'lamp',R:2400,x:XC,label:'GL1',name:'運轉指示燈'}],N(1420)); d(1420,'GL1 運轉');
-row('Y-Δ 起動',1465,'J36d',[{id:'2G6c',kind:'coil',relay:'2G6',R:4000,x:XC,label:'2G',name:'時間電驛 2G (30 s)'}],N(1465)); d(1465,'2G 30s');
-J('J35b',540,1510,'35'); J('J35c',540,1555,'35');
+J('J35b',540,1465,'35'); J('J35c',540,1510,'35');
 wire('J35a','J35b','Y-Δ 起動'); wire('J35b','J35c','Y-Δ 起動');
-row('Y-Δ 起動',1510,'J35b',[
+row('Y-Δ 起動',1465,'J35b',[
   {id:'2Sb',kind:'contact',ct:'NC',owner:'2S',timer:true,x:600,label:'2S',w:'37',name:'2S 延時 b 接點'},
   {id:'42Db',kind:'contact',ct:'NC',owner:'42D',x:720,label:'42D',w:'38',name:'42D 互鎖 b 接點'},
-  {id:'6Sc',kind:'coil',relay:'6S',R:340,x:XC,label:'6S',name:'6S Y 接觸器線圈 (MCS)'}],N(1510)); d(1510,'6S Y 接觸器 MCS');
-row('Y-Δ 起動',1555,'J35c',[
+  {id:'6Sc',kind:'coil',relay:'6S',R:340,x:XC,label:'6S',name:'6S Y 接觸器線圈 (MCS)'}],N(1465)); d(1465,'6S Y 接觸器 MCS');
+row('Y-Δ 起動',1510,'J35c',[
   {id:'2Sa',kind:'contact',ct:'NO',owner:'2S',timer:true,x:600,label:'2S',w:'39',name:'2S 延時 a 接點'},
-  {id:'6Sb',kind:'contact',ct:'NC',owner:'6S',x:720,label:'6S',w:'40',name:'6S 互鎖 b 接點'},
-  {id:'42Dc',kind:'coil',relay:'42D',R:340,x:XC,label:'42D',name:'42D Δ 接觸器線圈 (MCD)'}],N(1555)); d(1555,'42D Δ 接觸器 MCD');
+  {id:'6Sb',kind:'contact',ct:'NC',owner:'6S',x:720,label:'6S',w:'40',name:'6S 互鎖 b 接點'}],J('J40',860,1510,'40'));
+row('Y-Δ 起動',1510,'J40',[{id:'42Dc',kind:'coil',relay:'42D',R:340,x:XC,label:'42D',name:'42D Δ 接觸器線圈 (MCD)'}],N(1510)); d(1510,'42D Δ 接觸器 MCD');
+J('J40d',860,1555,'40'); wire('J40','J40d','容量控制');
+row('容量控制',1555,'J40d',[{id:'2C1c',kind:'coil',relay:'2C1',R:4000,x:XC,label:'2C1',name:'容量控制時間電驛 2C1 (30 s)',desc:'Δ 運轉後開始計時。'}],N(1555)); d(1555,'2C1 30s');
 J('J34a',400,1600,'34'); wire('J34','J34a','再起動延時');
 row('再起動延時',1600,'J34a',[{id:'2G1c',kind:'coil',relay:'2G1',R:4000,x:XC,label:'2G1',name:'再起動延時電驛線圈 2G1 (6 min)'}],N(1600)); d(1600,'2G1 再起動 6min');
+// --- 容量控制迴路（41～46 號線） ---
+// 起動時 CSV-1(25%) 經 2C1 b 接點通電；Δ 運轉 30 s 後 2C1 動作：CSV-1 斷電、2C2 開始計時；
+// 2C2 1 min 後：CSV-2(50%) 通電，若 23C1 OUT1 也閉合則 CSV-3(75%) 通電。
+row('容量控制',1645,L(1645),[
+  {id:'OUT1',kind:'contact',ct:'NO',owner:'TC2',tag:'T',x:120,label:'23C1 OUT1',w:'41',name:'23C1 OUT1（第二段溫度）',desc:'冰水 ≥ 9 °C 閉合，≤ 8 °C 開路，控制 75% 段。'},
+  {id:'2C2a',kind:'contact',ct:'NO',owner:'2C2',timer:true,x:600,label:'2C2',w:'42',name:'2C2 延時 a 接點（75% 段）'},
+  {id:'CSV3',kind:'sol',R:1500,x:XC,label:'CSV-3',name:'容量控制電磁閥 CSV-3 (75%)'}],N(1645)); d(1645,'CSV-3 75%');
+row('容量控制',1690,L(1690),[{id:'X1a3',kind:'contact',ct:'NO',owner:'X1',x:300,label:'X1',w:'43',name:'X1 a 接點（容量控制）'}],J('J43',500,1690,'43'));
+row('容量控制',1690,'J43',[{id:'2C1a',kind:'contact',ct:'NO',owner:'2C1',timer:true,x:600,label:'2C1',w:'44',name:'2C1 延時 a 接點'}],J('J44',760,1690,'44'));
+row('容量控制',1690,'J44',[{id:'2C2c',kind:'coil',relay:'2C2',R:4000,x:XC,label:'2C2',name:'容量控制時間電驛 2C2 (1 min)'}],N(1690)); d(1690,'2C2 1min');
+J('J44d',760,1735,'44'); wire('J44','J44d','容量控制');
+row('容量控制',1735,'J44d',[
+  {id:'2C2b',kind:'contact',ct:'NO',owner:'2C2',timer:true,x:820,label:'2C2',w:'45',name:'2C2 延時 a 接點（50% 段）'},
+  {id:'CSV2',kind:'sol',R:1500,x:XC,label:'CSV-2',name:'容量控制電磁閥 CSV-2 (50%)'}],N(1735)); d(1735,'CSV-2 50%');
+J('J43d',500,1780,'43'); wire('J43','J43d','容量控制');
+row('容量控制',1780,'J43d',[
+  {id:'2C1b',kind:'contact',ct:'NC',owner:'2C1',timer:true,x:600,label:'2C1',w:'46',name:'2C1 延時 b 接點（25% 段）'},
+  {id:'CSV1',kind:'sol',R:1500,x:XC,label:'CSV-1',name:'容量控制電磁閥 CSV-1 (25%)'}],N(1780)); d(1780,'CSV-1 25%');
 
 // 母線：把同一條母線上的節點由上到下連起來
 for(const pre of ['L','N']){
@@ -913,7 +940,8 @@ const TIMERS={
   '2G3':{type:'off',d:6,  label:'OFF 60 s'},
   '2G4':{type:'on', d:6,  label:'60 s'},
   '2G5':{type:'off',d:6,  label:'OFF 60 s'},
-  '2G6':{type:'on', d:3,  label:'30 s'}
+  '2C1':{type:'on', d:3,  label:'30 s'},
+  '2C2':{type:'on', d:6,  label:'1 min'}
 };
 const COILS=Object.keys(TIMERS).concat(RELAYS);
 const LOADS=ELIST.filter(e=>e.R);
@@ -928,7 +956,7 @@ function resetSim(){
   Object.assign(S,{nfb1:false,nfb2:false,estop:false,sw:'stop',remote:false,pump1:false,pump2:false,
     pressed:{ON:false,OFF:false},latch:{ON:false,OFF:false},manual:{},en:{},loadOn:{},V:null,nets:null,tm,
     flow1:0,flow2:0,Tch:12.5,Tret:13,Tcw:28,Td:40,HP:7.5,LP:7,hpTrip:false,lpOpen:false,cool:true,frz:false,
-    td95:false,t49:false,ol51:false,r47ok:false,humT:0,yTime:0,comp:'stop',compA:0});
+    td95:false,t49:false,ol51:false,r47ok:false,humT:0,yTime:0,comp:'stop',compA:0,stage2:true});
 }
 
 /* ========== 接點邏輯 ==========
@@ -959,8 +987,8 @@ function act(owner,en){
     case '23C3': return S.td95;
     case '23C4': return false;
     case '49C': return S.t49;
-    case 'OUT1': return S.cool;
-    case 'OUT2': return !S.cool;
+    case 'TC': return S.cool;        // 23C1 OUT2：需冷卻
+    case 'TC2': return S.stage2;     // 23C1 OUT1：第二段溫度
   }
   return false;
 }
@@ -1109,8 +1137,11 @@ function stepPhysics(dt){
   S.Tch=clamp(S.Tch,2,16);
   S.Tret+=(S.Tch+(run&&S.flow1>0.8?4.5:0.6)-S.Tret)*Math.min(1,0.3*dt);
   // 23C1 溫度控制：≥ 10 °C OUT1（需冷）、≤ 7 °C OUT2（停機）
-  if(!S.cool&&S.Tch>=10){ S.cool=true; ev('冰水回升至 10 °C，23C1 切到 OUT1（需冷卻）'); }
-  if(S.cool&&S.Tch<=7){ S.cool=false; ev('冰水降至 7 °C，23C1 切到 OUT2，溫度到達停機'); }
+  if(!S.cool&&S.Tch>=10){ S.cool=true; ev('冰水回升至 10 °C，23C1 OUT2 切到 33 號線（需冷卻）'); }
+  if(S.cool&&S.Tch<=7){ S.cool=false; ev('冰水降至 7 °C，23C1 OUT2 切到 31 號線，溫度到達停機'); }
+  // 23C1 OUT1（第二段）：≥ 9 °C 閉合、≤ 8 °C 開路，控制 75% 段
+  if(!S.stage2&&S.Tch>=9) S.stage2=true;
+  if(S.stage2&&S.Tch<=8) S.stage2=false;
   // 26W 防凍：≤ 3 °C 動作、≥ 5 °C 復歸
   if(!S.frz&&S.Tch<=3){ S.frz=true; ev('冰水溫度過低，26W 防凍開關動作','bad'); }
   if(S.frz&&S.Tch>=5) S.frz=false;
@@ -1232,7 +1263,7 @@ function buildSVG(){
 /* ========== 盤內元件 ==========
    TILE_DEFS 每一列是 [程式名稱, 說明]；PROT_DEFS 是保護與檢出元件（只顯示狀態）。 */
 const TILE_DEFS=[['X1','主控電驛'],['X2','相序保持'],['X3','遠控電驛'],['X4','油位電驛'],['52C','MCM 主'],['6S','MCS (Y)'],['42D','MCD (Δ)'],
-  ['2S','Y-Δ 計時'],['2G1','再起動'],['2G2','雙延時'],['2G3','低油位'],['2G4','油位'],['2G5','水壓差'],['2G6','2G 30s']];
+  ['2S','Y-Δ 計時'],['2G1','再起動'],['2G2','雙延時'],['2G3','低油位'],['2G4','油位'],['2G5','水壓差'],['2C1','容量 30s'],['2C2','容量 1min']];
 const PROT_DEFS=[['47R','相序／欠相'],['51C','過載'],['49C','內載過電流'],['63HR','高壓'],['63LP','低壓'],['26W','防凍'],['23C3','吐出溫度'],['23C4','回流管溫度'],['EW','水壓差'],['LO','油位']];
 function buildTiles(){
   $('#tilesR').innerHTML=TILE_DEFS.map(([k,n])=>`<button class="tile" id="t-${k}" data-relay="${k}"><b>${k}</b><small>${n}</small><span class="st">—</span></button>`).join('');
@@ -1275,6 +1306,7 @@ function render(){
   $('#fs1').classList.toggle('on',S.flow1>0.8); $('#fs2').classList.toggle('on',S.flow2>0.8);
   $('#svg-sv1').classList.toggle('on',!!S.loadOn.SV1); $('#svg-sv2').classList.toggle('on',!!S.loadOn.SV2);
   $('#heat').classList.toggle('on',!!S.loadOn.CCH);
+  for(const k of ['1','2','3']) $('#csv'+k).classList.toggle('on',!!S.loadOn['CSV'+k]);
   $('#compState').textContent={stop:'停止',Y:'Y 起動',D:'Δ 運轉',hum:'嗡嗡聲!'}[S.comp];
   $('#compA').textContent=S.compA.toFixed(1)+' A';
   $('#tTd').textContent='吐出 '+S.Td.toFixed(0)+' °C';
@@ -1357,7 +1389,7 @@ function guideText(){
   if(!S.en.X1) return '按住起動 PB。若 X1 不吸合，黑棒放 N 母線（2 號線），紅棒沿 9 → 22 號線逐點量，找出 220 V 消失的位置。';
   if(S.comp==='hum') return '壓縮機嗡嗡聲：切到「主電路」，檢查 NFB1、MCM、MCS、MCD 各相。';
   if(S.comp==='stop'){
-    if(!S.cool) return '冰水溫度已到（23C1 OUT2），屬於正常停機，等水溫回升。';
+    if(!S.cool) return '冰水溫度已到（23C1 OUT2 切到 31 號線），屬於正常停機，等水溫回升。';
     if(S.en['52C']||S.en['6S']||S.en['42D']) return '接觸器有吸合但壓縮機沒轉：比對 Y-Δ 順序（6S → 52C → 2S → 42D），也檢查主電路。';
     if(!S.tm['2G1'].out) return '等待 2G1 再起動延時（練習縮短為 12 秒）。';
     return '壓縮機該起動卻沒動：沿主機控制迴路 33 → 36 號線量測，比對 6S、52C 的動作順序。';
@@ -1443,7 +1475,7 @@ function bindPB(btn,key){
    想讓某個元件不出題，把它的 id 加進 EXCLUDE 即可。 */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const EXCLUDE=new Set(['YL1','YL2','YL3','YL4','YL5','YL7','RL1','23C4n','63LPn','63HRn','51Cn','47Rn','26Wn','X2a','X2c','2G4b',
-  'SV1','2G6c','SWR','REM','X3c','X3a1','X3a2','23C4','63LP','63HR','26W','47Ri1','47Ri2','WU','WV','WW']);
+  'SV1','SWR','REM','X3c','X3a1','X3a2','23C4','63LP','63HR','26W','47Ri1','47Ri2','WU','WV','WW']);
 const NOWIRE_ZONES=new Set(['母線','遠控','電源','47R','壓縮機','主電路 Y 結線']);
 function newExam(){
   const count=+$('#selCount').value, inclWire=$('#chkWire').checked, inclMain=$('#chkMain').checked;
