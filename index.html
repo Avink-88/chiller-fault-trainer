@@ -1159,8 +1159,10 @@ function stepPhysics(dt){
   if(mode==='Y'){ S.yTime+=dt; if(S.yTime>25&&!S.ol51){ S.ol51=true; ev('長時間以 Y 接線運轉，51C 過載跳脫','bad'); } } else S.yTime=0;
   // 冰水溫度：負載讓水溫往 16 °C 上升，壓縮機運轉且有冰水流量時下降
   S.Tch+=(16-S.Tch)*0.012*dt;
-  // 容量：CSV 通電＝加載。CSV-3 75%、CSV-2 50%、CSV-1 25%，都沒通電時為 0%（全卸載，不製冷）；停機時為 null
-  S.cap = !run ? null : S.loadOn.CSV3 ? 75 : S.loadOn.CSV2 ? 50 : S.loadOn.CSV1 ? 25 : 0;
+  // 容量：CSV 通電＝加載。CSV-3 75%、CSV-2 50%、CSV-1 25%；停機時為 null
+  // 都沒通電時：2C2 計時中為 0%（全卸載，不製冷），2C2 計時完成後最低容量為 25%
+  const capMin = S.tm['2C2'].out ? 25 : 0;
+  S.cap = !run ? null : S.loadOn.CSV3 ? 75 : S.loadOn.CSV2 ? 50 : S.loadOn.CSV1 ? 25 : capMin;
   // 冷卻速度依容量增減（Δ 75% 時每秒約降 0.30 °C；Y 起動時較慢）
   if(run&&S.flow1>0.8) S.Tch-=(mode==='D'?0.30:0.14)*(S.cap/75)*dt;
   S.Tch=clamp(S.Tch,2,16);
