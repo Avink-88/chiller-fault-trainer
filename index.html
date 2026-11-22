@@ -982,7 +982,7 @@ function resetSim(){
   Object.assign(S,{nfb1:false,nfb2:false,estop:false,sw:'stop',remote:false,pump1:false,pump2:false,
     pressed:{ON:false,OFF:false},latch:{ON:false,OFF:false},manual:{},en:{},loadOn:{},V:null,nets:null,tm,
     flow1:0,flow2:0,Tch:12.5,Tret:13,Tcw:28,Td:40,HP:7.5,LP:7,hpTrip:false,lpOpen:false,cool:true,frz:false,
-    td95:false,t49:false,ol51:false,r47ok:false,humT:0,yTime:0,comp:'stop',compA:0,stage2:true,cap:0});
+    td95:false,t49:false,ol51:false,r47ok:false,humT:0,yTime:0,comp:'stop',compA:0,stage2:true,cap:null});
 }
 
 /* ========== 接點邏輯 ==========
@@ -1159,10 +1159,10 @@ function stepPhysics(dt){
   if(mode==='Y'){ S.yTime+=dt; if(S.yTime>25&&!S.ol51){ S.ol51=true; ev('長時間以 Y 接線運轉，51C 過載跳脫','bad'); } } else S.yTime=0;
   // 冰水溫度：負載讓水溫往 16 °C 上升，壓縮機運轉且有冰水流量時下降
   S.Tch+=(16-S.Tch)*0.012*dt;
-  // 容量：CSV 通電＝加載。CSV-3 75%、CSV-2 50%、CSV-1 25%，都沒通電時以最低容量（15%）運轉
-  S.cap = !run ? 0 : S.loadOn.CSV3 ? 75 : S.loadOn.CSV2 ? 50 : S.loadOn.CSV1 ? 25 : 15;
+  // 容量：CSV 通電＝加載。CSV-3 75%、CSV-2 50%、CSV-1 25%，都沒通電時為 0%（全卸載，不製冷）；停機時為 null
+  S.cap = !run ? null : S.loadOn.CSV3 ? 75 : S.loadOn.CSV2 ? 50 : S.loadOn.CSV1 ? 25 : 0;
   // 冷卻速度依容量增減（Δ 75% 時每秒約降 0.30 °C；Y 起動時較慢）
-  if(run&&S.flow1>0.8) S.Tch-=(mode==='D'?0.30:0.14)*(Math.max(S.cap,15)/75)*dt;
+  if(run&&S.flow1>0.8) S.Tch-=(mode==='D'?0.30:0.14)*(S.cap/75)*dt;
   S.Tch=clamp(S.Tch,2,16);
   S.Tret+=(S.Tch+(run&&S.flow1>0.8?4.5:0.6)-S.Tret)*Math.min(1,0.3*dt);
   // 23C1 溫度控制：≥ 10 °C OUT1（需冷）、≤ 7 °C OUT2（停機）
@@ -1339,7 +1339,7 @@ function render(){
   $('#compState').textContent={stop:'停止',Y:'Y 起動',D:'Δ 運轉',hum:'嗡嗡聲!'}[S.comp];
   $('#compA').textContent=S.compA.toFixed(1)+' A';
   $('#tTd').textContent='吐出 '+S.Td.toFixed(0)+' °C';
-  $('#tCap').textContent=S.cap?('容量 '+S.cap+'%'+(S.cap===15?'（最低）':'')):'容量 —';
+  $('#tCap').textContent=S.cap==null?'容量 —':('容量 '+S.cap+'%'+(S.cap===0?'（全卸載）':''));
   $('#tTch').textContent=S.Tch.toFixed(1)+' °C'; $('#tTret').textContent=S.Tret.toFixed(1)+' °C'; $('#tTcw').textContent=S.Tcw.toFixed(1)+' °C';
   $('#hpNeedle').setAttribute('transform',`rotate(${-135+clamp(S.HP,0,30)/30*270})`);
   $('#lpNeedle').setAttribute('transform',`rotate(${-135+clamp(S.LP,0,10)/10*270})`);
